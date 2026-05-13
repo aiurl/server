@@ -17,4 +17,41 @@
         <connection>https://github.com/aiurl/server.git</connection>
     </scm>
 
+    <developers>
+        <developer>
+            <name>damon</name>
+            <id>Codespilot</id>
+            <email>zhaorong@outlook.com</email>
+            <url>https://github.com/Codespilot</url>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>framework</module>
+        <module>shared</module>
+        <module>identity</module>
+        <module>onetime-password</module>
+        <module>messaging</module>
+        <module>bundle</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>25</java.version>
+    </properties>
+
+    <repositories>
+		<repository>
+			<id>maven-org</id>
+			<name>Maven Central</name>
+			<url>https://repo1.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>maven</id>
+			<name>Maven Official</name>
+			<url>https://mvnrepository.com/</url>
+		</repository>
+	</repositories>
+
 </project>
