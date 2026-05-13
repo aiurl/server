@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.theurl</groupId>
-    <artifactId>root</artifactId>
-	<version>1.0-SNAPSHOT</version>
+    <artifactId>parent</artifactId>
+	<version>${project.version}</version>
 
     <packaging>pom</packaging>
 
-    <name>theurl-root</name>
+    <name>theurl-parent</name>
     <description>theurl root pom</description>
     <url>https://theurl.io</url>
 
@@ -26,19 +26,14 @@
         </developer>
     </developers>
 
-    <modules>
-        <module>framework</module>
-        <module>shared</module>
-        <module>identity</module>
-        <module>onetime-password</module>
-        <module>messaging</module>
-        <module>bundle</module>
-    </modules>
-
     <properties>
+        <project.version>1.0</project.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>25</java.version>
+        <jdk.version>25</jdk.version>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <spring-cloud.version>2025.1.1</spring-cloud.version>
     </properties>
 
@@ -72,6 +67,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
