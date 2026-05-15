@@ -21,6 +21,7 @@
         <module>framework</module>
         <module>identity</module>
         <module>shared</module>
+        <module>message</module>
     </modules>
 
     <scm>
@@ -71,6 +72,18 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+                <version>3.0.3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.neroyun</groupId>
+                <artifactId>mediator</artifactId>
+                <version>1.0.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
