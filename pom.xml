@@ -49,6 +49,7 @@
         <spring-cloud.version>2025.1.1</spring-cloud.version>
         <spring-boot.version>4.0.6</spring-boot.version>
         <spring-boot.run.skip>true</spring-boot.run.skip>
+        <neroyun.mediator.version>1.0.2</neroyun.mediator.version>
     </properties>
 
     <repositories>
@@ -83,7 +84,9 @@
             <dependency>
                 <groupId>com.neroyun</groupId>
                 <artifactId>mediator</artifactId>
-                <version>1.0.1</version>
+                <version>${neroyun.mediator.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
