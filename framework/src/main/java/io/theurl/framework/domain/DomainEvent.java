@@ -1,21 +1,50 @@
 package io.theurl.framework.domain;
 
 import io.theurl.framework.core.ObjectId;
+import io.theurl.framework.reflection.TypeHelper;
 
-import java.util.HashMap;
+import java.time.LocalDateTime;
 
-public abstract class DomainEvent implements IDomainEvent {
-    private final String PROPERTY_ID = "io.theurl.framework.domain.event.id";
-    private final HashMap<String, Object> properties = new HashMap<>();
+@SuppressWarnings({"unused", "unchecked"})
+public abstract class DomainEvent extends AbstractEvent implements IDomainEvent {
 
-    protected DomainEvent() {
-        var type = this.getClass().getGenericSuperclass();
-        properties.put(PROPERTY_ID, ObjectId.guid());
+    private Object aggregatePayload;
+
+    public Object getAggregatePayload() {
+        return aggregatePayload;
     }
 
-    public String get(String name) {
-        return (String) properties.get(name);
+    public void setAggregatePayload(Object aggregatePayload) {
+        this.aggregatePayload = aggregatePayload;
+    }
+
+    public <ID extends Comparable<ID>> void Attach(IAggregateRoot<ID> aggregate) {
+        setOriginatorType(aggregate.getClass().getName());
+        setOriginatorId(aggregate.getId().toString());
+        setAggregatePayload(aggregate);
+    }
+
+    public EventAggregate getEventAggregate() {
+        var aggregate = new EventAggregate(ObjectId.guid().toString());
+        aggregate.setTypeName(this.getClass().getName());
+        aggregate.setEventId(getEventId());
+        aggregate.setEventIntent(getEventIntent());
+        aggregate.setOriginatorType(getOriginatorType());
+        aggregate.setOriginatorId(getOriginatorId());
+        aggregate.setTimestamp(LocalDateTime.now());
+        aggregate.setEventPayload(this);
+        return aggregate;
     }
 
 
+    public <V> V getAggregate(Class<V> targetType) {
+        var aggregate = getAggregatePayload();
+        if (aggregate == null) {
+            return null;
+        }
+        if (targetType.isAssignableFrom(aggregate.getClass())) {
+            return (V) aggregate;
+        }
+        return (V) TypeHelper.coerceValue(targetType, aggregate.getClass(), aggregate);
+    }
 }
