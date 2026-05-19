@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.6</version>
+    </parent>
+	<groupId>io.theurl</groupId>
+    <artifactId>parent</artifactId>
+	<version>1.0</version>
+
+    <packaging>pom</packaging>
+
+    <name>theurl-parent</name>
+    <description>theurl root pom</description>
+    <url>https://theurl.io</url>
+    <modules>
+        <module>config</module>
+        <module>framework</module>
+        <module>identity</module>
+        <module>shared</module>
+        <module>message</module>
+    </modules>
+
+    <scm>
+        <url>https://github.com/aiurl/</url>
+        <connection>https://github.com/aiurl/server.git</connection>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>damon</name>
+            <id>Codespilot</id>
+            <email>zhaorong@outlook.com</email>
+            <url>https://github.com/Codespilot</url>
+        </developer>
+    </developers>
+
+    <properties>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <project.version>1.0</project.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>25</java.version>
+        <jdk.version>25</jdk.version>
+        <spring-cloud.version>2025.1.1</spring-cloud.version>
+        <spring-boot.version>4.0.6</spring-boot.version>
+        <spring-boot.run.skip>true</spring-boot.run.skip>
+        <neroyun.mediator.version>1.0.2</neroyun.mediator.version>
+    </properties>
+
+    <repositories>
+		<repository>
+			<id>maven-org</id>
+			<name>Maven Central</name>
+			<url>https://repo1.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>maven</id>
+			<name>Maven Official</name>
+			<url>https://mvnrepository.com/</url>
+		</repository>
+	</repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+                <version>3.0.3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.neroyun</groupId>
+                <artifactId>mediator</artifactId>
+                <version>${neroyun.mediator.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <skip>${spring-boot.run.skip}</skip>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
