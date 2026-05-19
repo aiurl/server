@@ -12,6 +12,7 @@ package io.theurl.framework.utility;
  * This implementation allows for up to 1024 unique IDs per millisecond per worker and supports up to 32 datacenters and 32 workers per datacenter.
  * The custom epoch is set to January 1, 2021, which allows for a long lifespan of the ID generation without running out of bits for the timestamp.
  */
+@SuppressWarnings("unused")
 public final class SnowflakeId {
     private static final long EPOCH = 1609459200000L; // 2021-01-01 00:00:00 UTC
     private static final long WORKER_ID_BITS = 5L;
@@ -26,8 +27,8 @@ public final class SnowflakeId {
     private static final long DATACENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
     private static final long TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS;
 
-    private long workerId;
-    private long datacenterId;
+    private final long workerId;
+    private final long datacenterId;
     private long sequence = 0L;
     private long lastTimestamp = -1L;
 
