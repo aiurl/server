@@ -4,6 +4,12 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * ShortUniqueId is a utility class for generating short, unique string IDs from integers or long integers.
+ * It provides methods to encode and decode integers, long integers, and hexadecimal strings into short unique IDs.
+ * The class allows customization of the alphabet, separators, guards, and salt used in the encoding process to ensure uniqueness and security.
+ * The implementation is based on the Hashids algorithm, which is designed to create short, non-sequential, and URL-friendly IDs.
+ */
 @SuppressWarnings("unused")
 public final class ShortUniqueId {
     private static final String DEFAULT_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -118,25 +124,56 @@ public final class ShortUniqueId {
     }
 
     // Public encode/decode methods
+
+    /**
+     * Encode a single integer into a short unique string ID.
+     *
+     * @param number the integer to encode
+     * @return a short unique string ID representing the input integer
+     */
     public String encode(int number) {
         return encode(new long[]{number});
     }
 
+    /**
+     * Encode one or more integers into a short unique string ID.
+     *
+     * @param numbers the integers to encode
+     * @return a short unique string ID representing the input integers
+     */
     public String encode(int... numbers) {
         long[] arr = new long[numbers.length];
         for (int i = 0; i < numbers.length; i++) arr[i] = numbers[i];
         return encode(arr);
     }
 
+    /**
+     * Encode a collection of integers into a short unique string ID.
+     *
+     * @param numbers the collection of integers to encode
+     * @return a short unique string ID representing the input integers
+     */
     public String encode(Collection<Integer> numbers) {
         long[] arr = numbers.stream().mapToLong(Integer::longValue).toArray();
         return encode(arr);
     }
 
+    /**
+     * Encode a single long integer into a short unique string ID.
+     *
+     * @param number the long integer to encode
+     * @return a short unique string ID representing the input long integer
+     */
     public String encode(long number) {
         return encode(new long[]{number});
     }
 
+    /**
+     * Encode one or more long integers into a short unique string ID.
+     *
+     * @param numbers the long integers to encode
+     * @return a short unique string ID representing the input long integers
+     */
     public String encode(long... numbers) {
         if (numbers == null || numbers.length == 0) return "";
         for (long n : numbers) if (n < 0) return "";
@@ -205,13 +242,27 @@ public final class ShortUniqueId {
         return sb.toString();
     }
 
+    /**
+     * Decode a short unique string ID back into the original integer(s).
+     *
+     * @param hash the short unique string ID to decode
+     * @return an array of integers representing the original values
+     */
     public int[] decode(String hash) {
         long[] longs = decodeLong(hash);
         int[] res = new int[longs.length];
-        for (int i = 0; i < longs.length; i++) res[i] = (int) longs[i];
+        for (int i = 0; i < longs.length; i++) {
+            res[i] = (int) longs[i];
+        }
         return res;
     }
 
+    /**
+     * Decode a short unique string ID back into the original long integer(s).
+     *
+     * @param hash the short unique string ID to decode
+     * @return an array of long integers representing the original values
+     */
     public long[] decodeLong(String hash) {
         if (hash == null || hash.isBlank()) {
             return new long[0];
@@ -219,6 +270,12 @@ public final class ShortUniqueId {
         return numbersFrom(hash);
     }
 
+    /**
+     * Encode a hexadecimal string into a short unique string ID. The input hex string is split into 12-character chunks, each chunk is prefixed with '1' to ensure it can be parsed as a valid long integer, and then encoded using the standard encoding method.
+     *
+     * @param hex the hexadecimal string to encode
+     * @return a short unique string ID representing the input hexadecimal string, or an empty string if the input is invalid
+     */
     public String encodeHex(String hex) {
         if (hex == null || hex.isBlank() || !HEX_VALIDATOR.matcher(hex).matches()) return "";
         Matcher m = HEX_SPLITTER.matcher(hex);
@@ -233,6 +290,12 @@ public final class ShortUniqueId {
         return encode(arr);
     }
 
+    /**
+     * Decode a short unique string ID back into the original hexadecimal string. The decoded long integers are converted back to hexadecimal strings, concatenated together, and returned as the final result.
+     *
+     * @param hash the short unique string ID to decode
+     * @return the original hexadecimal string represented by the input ID, or an empty string if the input is invalid
+     */
     public String decodeHex(String hash) {
         long[] numbers = decodeLong(hash);
         StringBuilder sb = new StringBuilder();
