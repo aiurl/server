@@ -5,31 +5,38 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Component("external-auth-provider-github")
-public class GithubAuthProvider extends BaseAuthProvider {
+@Component("external-auth-provider-google")
+public class GoogleAuthProvider extends BaseAuthProvider {
 
-    @Value("${external-auth.github.client-id}")
+    @Value("${external-auth.google.client-id}")
     private String clientId;
-    @Value("${external-auth.github.client-secret}")
-    private String secret;
+    @Value("${external-auth.google.client-secret}")
+    private String clientSecret;
+    @Value("${external-auth.redirect-uri}")
+    private String redirectUri;
 
     @Override
     public ExternalAuthResult authenticate(String authCode) {
-        var token = getToken("https://github.com/login/oauth/access_token", Map.of(
+        var tokenParams = Map.of(
             "client_id", clientId,
-            "client_secret", secret,
-            "code", authCode
-        ), "query");
-        var user = getUserInfo(token, "https://api.github.com/user");
+            "client_secret", clientSecret,
+            "redirect_uri", redirectUri,
+            "code", authCode,
+            "grant_type", "authorization_code");
+
+        var token = getToken("https://oauth2.googleapis.com/token", tokenParams, "form");
+
+        var user = getUserInfo(token, "https://www.googleapis.com/oauth2/v3/userinfo");
+
         return new ExternalAuthResult() {
             @Override
             public String getId() {
-                return user.findValue("id").asText();
+                return user.findValue("sub").asText();
             }
 
             @Override
             public String getUsername() {
-                return user.findValue("login").asText();
+                return user.findValue("email").asText();
             }
 
             @Override
@@ -44,7 +51,7 @@ public class GithubAuthProvider extends BaseAuthProvider {
 
             @Override
             public String getAvatarUrl() {
-                return user.findValue("avatar_url").asText();
+                return user.findValue("picture").asText();
             }
         };
     }
