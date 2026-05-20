@@ -2,8 +2,7 @@ package io.theurl.identity.external;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -18,9 +17,8 @@ import java.util.stream.Collectors;
  * Provides common methods for external authentication providers, such as fetching user info and access tokens.
  * Concrete providers (e.g., Google, Microsoft, GitHub) can extend this class to implement their specific authentication logic while reusing these common methods.
  */
+@Slf4j
 public abstract class BaseAuthProvider implements ExternalAuthProvider {
-
-    private final Logger logger = LoggerFactory.getLogger(BaseAuthProvider.class);
 
     protected JsonNode getUserInfo(String token, String url) {
         var request = HttpRequest.newBuilder()
@@ -38,7 +36,7 @@ public abstract class BaseAuthProvider implements ExternalAuthProvider {
                 return readJson(response.body());
             }
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -77,7 +75,7 @@ public abstract class BaseAuthProvider implements ExternalAuthProvider {
                 return json.findValue("access_token").asText();
             }
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }
