@@ -25,3 +25,17 @@ spring:
         mongodb:
             uri: ${MONGO_URI:mongodb://localhost:27017/linkyou}
 
+external-auth:
+    redirect-uri: "https://theurl.io/auth/callback"
+    google:
+        client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
+        client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
+    github:
+        client-id: ${GITHUB_CLIENT_ID:your-github-client-id}
+        client-secret: ${GITHUB_CLIENT_SECRET:your-github-client-secret}
+    facebook:
+        client-id: ${FACEBOOK_CLIENT_ID:your-facebook-client-id}
+        client-secret: ${FACEBOOK_CLIENT_SECRET:your-facebook-client-secret}
+    microsoft:
+        client-id: ${MICROSOFT_CLIENT_ID:your-microsoft-client-id}
+        client-secret: ${MICROSOFT_CLIENT_SECRET:your-microsoft-client-secret}
