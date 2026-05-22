@@ -9,10 +9,11 @@ spring:
     cloud:
         config:
             enabled: false
+            uri: ${CONFIG_SERVER_URI:http://localhost:8900}
     datasource:
-        url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou}
+        url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou?currentSchema=public}
         username: ${DB_USERNAME:postgres}
-        password: ${DB_PASSWORD:postgres}
+        password: ${DB_PASSWORD:nerosoft.8888}
         driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
     jpa:
         hibernate:
@@ -39,3 +40,11 @@ external-auth:
     microsoft:
         client-id: ${MICROSOFT_CLIENT_ID:your-microsoft-client-id}
         client-secret: ${MICROSOFT_CLIENT_SECRET:your-microsoft-client-secret}
+
+logging:
+    file:
+        path: logs
+    level:
+        io.theurl.identity: debug
+        org.springframework: info
+        root: info
