@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>4.0.6</version>
     </parent>
-	<groupId>io.theurl</groupId>
+    <groupId>io.theurl</groupId>
     <artifactId>parent</artifactId>
-	<version>1.0</version>
+    <version>1.0</version>
 
     <packaging>pom</packaging>
 
@@ -47,23 +47,24 @@
         <java.version>25</java.version>
         <jdk.version>25</jdk.version>
         <spring-cloud.version>2025.1.1</spring-cloud.version>
+        <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
         <spring-boot.version>4.0.6</spring-boot.version>
         <spring-boot.run.skip>true</spring-boot.run.skip>
-        <neroyun.mediator.version>1.0.2</neroyun.mediator.version>
+        <neroyun.mediator.version>1.1.0</neroyun.mediator.version>
     </properties>
 
     <repositories>
-		<repository>
-			<id>maven-org</id>
-			<name>Maven Central</name>
-			<url>https://repo1.maven.org/maven2/</url>
-		</repository>
-		<repository>
-			<id>maven</id>
-			<name>Maven Official</name>
-			<url>https://mvnrepository.com/</url>
-		</repository>
-	</repositories>
+        <repository>
+            <id>maven-org</id>
+            <name>Maven Central</name>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>maven</id>
+            <name>Maven Official</name>
+            <url>https://mvnrepository.com/</url>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -85,6 +86,13 @@
                 <groupId>com.neroyun</groupId>
                 <artifactId>mediator</artifactId>
                 <version>${neroyun.mediator.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

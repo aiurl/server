@@ -9,25 +9,25 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class CredentialException extends RuntimeException {
-    private final String credential;
+    private final Object credential;
     private final Map<String, Object> details = Collections.emptyMap();
 
 
-    public CredentialException(String credential) {
+    public CredentialException(Object credential) {
         this.credential = credential;
     }
 
-    public CredentialException(String credential, String message) {
+    public CredentialException(Object credential, String message) {
         super(message);
         this.credential = credential;
     }
 
-    public CredentialException(String credential, String message, Throwable cause) {
+    public CredentialException(Object credential, String message, Throwable cause) {
         super(message, cause);
         this.credential = credential;
     }
 
-    public String getCredential() {
+    public Object getCredential() {
         return credential;
     }
 

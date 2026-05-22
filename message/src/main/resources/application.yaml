@@ -2,15 +2,18 @@ server:
     port: 8902
 
 spring:
+    profiles:
+        active: ${SPRING_PROFILES_ACTIVE:dev}
     application:
         name: message
     config:
         import: optional:file:.env[.properties]
     cloud:
         config:
+            enabled: false
             uri: ${CONFIG_SERVER_URI:http://localhost:8900}
     datasource:
-        url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou}
+        url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou?currentSchema=public}
         username: ${DB_USERNAME:postgres}
         password: ${DB_PASSWORD:postgres}
         driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
