@@ -22,11 +22,19 @@ spring:
             ddl-auto: update
             dialect: ${DB_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
         show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
     data:
         redis:
             url: ${REDIS_URL:redis://localhost:6379}
         mongodb:
             uri: ${MONGO_URI:mongodb://localhost:27017/linkyou}
+    web:
+        error:
+            include-message: ALWAYS
+            include-exception: true
+            include-stacktrace: ALWAYS
 
 external-auth:
     redirect-uri: "https://theurl.io/auth/callback"
@@ -43,10 +51,16 @@ external-auth:
         client-id: ${MICROSOFT_CLIENT_ID:your-microsoft-client-id}
         client-secret: ${MICROSOFT_CLIENT_SECRET:your-microsoft-client-secret}
 
+jwt:
+    secret: ${JWT_SECRET:your-jwt-secret}
+    issuer: theurl.io
+    expiration: 3600 # in seconds
+
 logging:
     file:
+        name: #{level}-{T(java.time.LocalDate).now()}.log
         path: logs
     level:
         io.theurl.identity: debug
-        org.springframework: info
+        org.springframework: debug
         root: info
