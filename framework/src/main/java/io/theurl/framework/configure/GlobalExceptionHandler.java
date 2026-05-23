@@ -1,5 +1,6 @@
 package io.theurl.framework.configure;
 
+import com.neroyun.mediator.internal.AggregateException;
 import com.neroyun.mediator.validation.ValidationException;
 import io.theurl.framework.security.AccountException;
 import io.theurl.framework.security.CredentialException;
@@ -63,11 +64,26 @@ public class GlobalExceptionHandler {
                              .body(Map.of(name, exception.getLocalizedMessage()));
     }
 
+    @ExceptionHandler(AggregateException.class)
+    public ResponseEntity<Map<String, String>> handleAggregateException(AggregateException exception) {
+        LOGGER.error(exception.getMessage(), exception);
+        Throwable cause = exception.getExceptions().getFirst();
+        LOGGER.debug("AggregateException contains {} exceptions, handling the first one: {}", exception.getExceptions().size(), cause.getMessage());
+        return handleGeneralException(cause);
+    }
+
     @ExceptionHandler(CompletionException.class)
     public ResponseEntity<Map<String, String>> handleCompletionException(CompletionException exception) {
         LOGGER.error(exception.getMessage(), exception);
         Throwable cause = exception.getCause();
-        return switch (cause) {
+        return handleGeneralException(cause);
+    }
+
+    private ResponseEntity<Map<String, String>> handleGeneralException(Throwable exception) {
+        if (exception == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return switch (exception) {
             case AccountException accountException -> handleAccountException(accountException);
             case EntityNotFoundException entityNotFoundException ->
                 handleEntityNotFoundException(entityNotFoundException);
@@ -77,8 +93,8 @@ public class GlobalExceptionHandler {
             case UnauthorizedAccessException unauthorizedAccessException ->
                 handleUnauthorizedAccessException(unauthorizedAccessException);
             case ValidationException validationException -> handleValidationException(validationException);
-            case null, default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                                .body(Map.of(name, exception.getLocalizedMessage()));
+            default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                     .body(Map.of(name, exception.getLocalizedMessage()));
         };
     }
 }
