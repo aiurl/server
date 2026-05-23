@@ -1,0 +1,26 @@
+package io.theurl.identity.application.event;
+
+import com.neroyun.mediator.Event;
+import io.theurl.framework.domain.ApplicationEvent;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+public final class UserAuthSuccessEvent extends ApplicationEvent implements Event {
+    private final String grantType;
+    private final Long userId;
+
+
+    public UserAuthSuccessEvent(String grantType, Long userId) {
+        this.grantType = grantType;
+        this.userId = userId;
+    }
+
+    private String username;
+    private LocalDateTime grantTime;
+    private Map<String, String> data;
+}
