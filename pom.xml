@@ -50,8 +50,9 @@
         <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
         <spring-boot.version>4.0.6</spring-boot.version>
         <spring-boot.run.skip>true</spring-boot.run.skip>
-        <neroyun.mediator.version>1.1.1</neroyun.mediator.version>
+        <neroyun.mediator.version>1.1.2</neroyun.mediator.version>
         <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
+        <modelmapper.version>3.2.6</modelmapper.version>
     </properties>
 
     <repositories>
@@ -108,6 +109,13 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>2.0.7</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.modelmapper</groupId>
+                <artifactId>modelmapper</artifactId>
+                <version>${modelmapper.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
