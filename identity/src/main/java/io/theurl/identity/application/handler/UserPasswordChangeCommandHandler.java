@@ -1,7 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
-import io.theurl.identity.application.command.UserAccessFailureCountCommand;
+import io.theurl.identity.application.command.UserPasswordChangeCommand;
 import io.theurl.identity.domain.repository.UserRepository;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -12,26 +12,22 @@ import java.util.concurrent.CompletableFuture;
 
 @Component
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class UserAccessFailureCountCommandHandler implements Handler<UserAccessFailureCountCommand, Void> {
+public class UserPasswordChangeCommandHandler implements Handler<UserPasswordChangeCommand, Void> {
 
     private final UserRepository repository;
 
-    public UserAccessFailureCountCommandHandler(UserRepository repository) {
+    public UserPasswordChangeCommandHandler(UserRepository repository) {
         this.repository = repository;
     }
 
     @Override
-    public CompletableFuture<Void> handleAsync(UserAccessFailureCountCommand message) {
+    public CompletableFuture<Void> handleAsync(UserPasswordChangeCommand message) {
         var user = repository.findById(message.getUserId());
         if (user == null) {
             return CompletableFuture.completedFuture(null);
         }
 
-        switch (message.getAction()) {
-            case "increase" -> user.increaseAccessFailedCount();
-            case "reset" -> user.resetAccessFailedCount();
-        }
-
+        user.setPassword(message.getPassword(), message.getChangeType());
         repository.save(user);
         return CompletableFuture.completedFuture(null);
     }
