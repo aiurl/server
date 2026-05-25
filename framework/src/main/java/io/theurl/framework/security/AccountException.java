@@ -9,25 +9,25 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class AccountException extends RuntimeException {
-    private final String identity;
+    private final Object identity;
 
     private final Map<String, Object> details = Collections.emptyMap();
 
-    public AccountException(String identity) {
+    public AccountException(Object identity) {
         this.identity = identity;
     }
 
-    public AccountException(String identity, String message) {
+    public AccountException(Object identity, String message) {
         super(message);
         this.identity = identity;
     }
 
-    public AccountException(String identity, String message, Throwable cause) {
+    public AccountException(Object identity, String message, Throwable cause) {
         super(message, cause);
         this.identity = identity;
     }
 
-    public String getIdentity() {
+    public Object getIdentity() {
         return identity;
     }
 

@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Data
 @Entity
@@ -53,6 +54,14 @@ public class User implements Persistable<Long> {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private Collection<UserRole> roles;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private Collection<UserAuthority> authorities;
 
     @Override
     public Long getId() {

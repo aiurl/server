@@ -6,15 +6,15 @@ package io.theurl.framework.security;
  */
 @SuppressWarnings("unused")
 public class AccountLockedException extends AccountException {
-    public AccountLockedException(String identity) {
+    public AccountLockedException(Object identity) {
         super(identity);
     }
 
-    public AccountLockedException(String identity, String message) {
+    public AccountLockedException(Object identity, String message) {
         super(identity, message);
     }
 
-    public AccountLockedException(String identity, String message, Throwable cause) {
+    public AccountLockedException(Object identity, String message, Throwable cause) {
         super(identity, message, cause);
     }
 }

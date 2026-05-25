@@ -36,7 +36,6 @@ public abstract class DomainEvent extends AbstractEvent implements IDomainEvent 
         return aggregate;
     }
 
-
     public <V> V getAggregate(Class<V> targetType) {
         var aggregate = getAggregatePayload();
         if (aggregate == null) {
@@ -46,5 +45,12 @@ public abstract class DomainEvent extends AbstractEvent implements IDomainEvent 
             return (V) aggregate;
         }
         return (V) TypeHelper.coerceValue(targetType, aggregate.getClass(), aggregate);
+    }
+
+    @Override
+    public <ID extends Comparable<ID>> void attach(IAggregateRoot<ID> aggregateRoot) {
+        setOriginatorId(aggregateRoot.getId().toString());
+        setOriginatorType(aggregateRoot.getClass().getName());
+        setAggregatePayload(aggregateRoot);
     }
 }

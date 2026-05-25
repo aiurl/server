@@ -1,6 +1,5 @@
 package io.theurl.framework.utility;
 
-import lombok.Getter;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("unused")
 @Component
 public class SpringUtil implements ApplicationContextAware {
-    @Getter
+
     private static ApplicationContext applicationContext;
 
     @Override
@@ -18,6 +17,10 @@ public class SpringUtil implements ApplicationContextAware {
         if (applicationContext == null) {
             applicationContext = context;
         }
+    }
+
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
     }
 
     public static <T> T getBean(Class<T> clazz) {

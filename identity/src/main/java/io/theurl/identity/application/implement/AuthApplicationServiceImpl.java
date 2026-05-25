@@ -30,10 +30,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -110,7 +107,7 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
                 handleException(e, ex -> {
                     switch (ex) {
                         case AccountLockedException exception:
-                            event.setUserId(exception.getIdentity());
+                            event.setUserId((Long) exception.getIdentity());
                             event.setGrantType(request.grantType());
                             event.setGrantTime(LocalDateTime.now());
                             event.setError(exception.getLocalizedMessage());
