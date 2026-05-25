@@ -6,15 +6,15 @@ package io.theurl.framework.security;
  */
 @SuppressWarnings("unused")
 public class AccountExpiredException extends AccountException {
-    public AccountExpiredException(String identity) {
+    public AccountExpiredException(Object identity) {
         super(identity);
     }
 
-    public AccountExpiredException(String identity, String message) {
+    public AccountExpiredException(Object identity, String message) {
         super(identity, message);
     }
 
-    public AccountExpiredException(String identity, String message, Throwable cause) {
+    public AccountExpiredException(Object identity, String message, Throwable cause) {
         super(identity, message, cause);
     }
 }

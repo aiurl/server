@@ -22,12 +22,12 @@ public class UserAccessFailureCountCommandHandler implements Handler<UserAccessF
 
     @Override
     public CompletableFuture<Void> handleAsync(UserAccessFailureCountCommand message) {
-        var user = repository.findById(message.getUserId());
+        var user = repository.findById(message.userId());
         if (user == null) {
             return CompletableFuture.completedFuture(null);
         }
 
-        switch (message.getAction()) {
+        switch (message.action()) {
             case "increase" -> user.increaseAccessFailedCount();
             case "reset" -> user.resetAccessFailedCount();
         }

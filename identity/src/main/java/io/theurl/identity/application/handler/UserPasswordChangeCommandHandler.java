@@ -22,12 +22,12 @@ public class UserPasswordChangeCommandHandler implements Handler<UserPasswordCha
 
     @Override
     public CompletableFuture<Void> handleAsync(UserPasswordChangeCommand message) {
-        var user = repository.findById(message.getUserId());
+        var user = repository.findById(message.userId());
         if (user == null) {
             return CompletableFuture.completedFuture(null);
         }
 
-        user.setPassword(message.getPassword(), message.getChangeType());
+        user.setPassword(message.password(), message.changeType());
         repository.save(user);
         return CompletableFuture.completedFuture(null);
     }

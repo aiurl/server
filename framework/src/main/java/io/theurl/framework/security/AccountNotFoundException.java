@@ -6,15 +6,15 @@ package io.theurl.framework.security;
  */
 @SuppressWarnings("unused")
 public class AccountNotFoundException extends AccountException {
-    public AccountNotFoundException(String identity) {
+    public AccountNotFoundException(Object identity) {
         super(identity);
     }
 
-    public AccountNotFoundException(String identity, String message) {
+    public AccountNotFoundException(Object identity, String message) {
         super(identity, message);
     }
 
-    public AccountNotFoundException(String identity, String message, Throwable cause) {
+    public AccountNotFoundException(Object identity, String message, Throwable cause) {
         super(identity, message, cause);
     }
 }
