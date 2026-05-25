@@ -11,7 +11,7 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UserAuthFailureEvent extends ApplicationEvent implements Event {
-    private String userId;
+    private Long userId;
     private String username;
     private String grantType;
     private LocalDateTime grantTime;

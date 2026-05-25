@@ -24,6 +24,7 @@ spring:
         show-sql: true
         properties:
             hibernate:
+                multiTenancy: SCHEMA
                 format_sql: true
     data:
         redis:

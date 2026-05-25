@@ -1,4 +1,4 @@
-package io.theurl.identity;
+package io.theurl.framework.utility;
 
 import lombok.Getter;
 import org.jspecify.annotations.NonNull;

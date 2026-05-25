@@ -8,6 +8,7 @@ import io.theurl.identity.persistence.query.UserAuthInfoQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -24,11 +25,8 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserAuthInfoQueryHandler implements Handler<UserAuthInfoQuery, UserAuthInfo> {
 
-    private final EntityManager entityManager;
-
-    public UserAuthInfoQueryHandler(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
+    @PersistenceContext
+    private EntityManager context;
 
     /**
      * Handles the given query and returns the corresponding UserAuthInfo.
@@ -42,7 +40,7 @@ public class UserAuthInfoQueryHandler implements Handler<UserAuthInfoQuery, User
         return supplyAsync(() -> {
             String sql = getSql(query);
 
-            var typedQuery = entityManager.createQuery(sql, User.class);
+            var typedQuery = context.createQuery(sql, User.class);
 
             switch (query.provider()) {
                 case "id" -> typedQuery.setParameter("id", Long.parseLong(query.name()));
@@ -67,7 +65,7 @@ public class UserAuthInfoQueryHandler implements Handler<UserAuthInfoQuery, User
                 return null;
             }
 
-            List<UserRole> roles = entityManager.createQuery("SELECT u from UserRole u where u.userId = :userId", UserRole.class).setParameter("userId", user.getId()).getResultList();
+            List<UserRole> roles = context.createQuery("SELECT u from UserRole u where u.userId = :userId", UserRole.class).setParameter("userId", user.getId()).getResultList();
 
             return new UserAuthInfo() {{
                 setId(user.getId());

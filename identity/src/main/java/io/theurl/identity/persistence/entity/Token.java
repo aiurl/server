@@ -16,11 +16,11 @@ public class Token implements Persistable<Long> {
     @Id
     private Long id;
 
-    @Column(length = 32)
-    private String type;
+    @Column(length = 36)
+    private String jti;
 
-    @Column(length = 256)
-    private String key;
+    @Column(length = 1000)
+    private String content;
 
     @Column
     private Long subject;
