@@ -1,0 +1,27 @@
+package io.theurl.identity.application.handler;
+
+import com.neroyun.mediator.Handler;
+import io.theurl.identity.application.command.UserAccessFailureCountCommand;
+import io.theurl.identity.domain.repository.UserRepository;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.util.concurrent.CompletableFuture;
+
+@Component
+@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class UserAccessFailureCountCommandHandler implements Handler<UserAccessFailureCountCommand, Void> {
+
+    private final UserRepository repository;
+
+    public UserAccessFailureCountCommandHandler(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public CompletableFuture<Void> handleAsync(UserAccessFailureCountCommand message) {
+        return null;
+    }
+}
