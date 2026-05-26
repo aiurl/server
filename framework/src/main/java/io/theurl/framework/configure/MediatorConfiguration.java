@@ -1,6 +1,7 @@
 package io.theurl.framework.configure;
 
 import com.neroyun.mediator.*;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +13,9 @@ import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.RequestContextListener;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("rawtypes")
@@ -34,31 +37,16 @@ public class MediatorConfiguration {
         executor.setCorePoolSize(8);
         executor.setMaxPoolSize(32);
         executor.setQueueCapacity(200);
-        executor.setTaskDecorator(copyRequestContextDecorator());
+        executor.setTaskDecorator(new ContextCopyingDecorator());
         executor.initialize();
         return executor;
-    }
-
-    private TaskDecorator copyRequestContextDecorator() {
-        return runnable -> {
-            RequestAttributes context = RequestContextHolder.getRequestAttributes();
-            return () -> {
-                try {
-                    if (context != null) {
-                        RequestContextHolder.setRequestAttributes(context);
-                    }
-                    runnable.run();
-                } finally {
-                    RequestContextHolder.resetRequestAttributes();
-                }
-            };
-        };
     }
 
     @Bean(name = "applicationEventMulticaster")
     public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
         SimpleApplicationEventMulticaster multicaster = new SimpleApplicationEventMulticaster();
-        multicaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
+        multicaster.setTaskExecutor(taskExecutor());
+        //multicaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
         return multicaster;
     }
 }
