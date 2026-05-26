@@ -4,16 +4,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.theurl.identity.application.contract.UserApplicationService;
 import io.theurl.identity.application.dto.UserProfileResponseDto;
-import io.theurl.identity.configure.JwtAuthenticationFilter;
-import io.theurl.identity.configure.SecurityConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
@@ -28,8 +26,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = AccountController.class)
-@Import({SecurityConfiguration.class, JwtAuthenticationFilter.class})
+@SpringBootTest
+@AutoConfigureMockMvc
 @TestPropertySource(properties = "jwt.secret=01234567890123456789012345678901")
 class AccountControllerSecurityTests {
 
@@ -38,7 +36,7 @@ class AccountControllerSecurityTests {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserApplicationService userApplicationService;
 
     @Test
