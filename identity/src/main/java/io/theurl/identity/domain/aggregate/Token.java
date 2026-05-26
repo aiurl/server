@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 @SuppressWarnings({"LombokGetterMayBeUsed"})
 public class Token extends AggregateRoot<Long> {
-    private String jti;
-    private String content;
-    private Long subject;
+    private final String jti;
+    private final String content;
+    private final Long subject;
     private LocalDateTime issuedAt;
     private LocalDateTime expiresAt;
 
@@ -20,6 +20,9 @@ public class Token extends AggregateRoot<Long> {
      */
     public Token(Long id, String jti, String content, Long subject) {
         super(id);
+        this.jti = jti;
+        this.content = content;
+        this.subject = subject;
     }
 
     public LocalDateTime getIssuedAt() {
@@ -30,15 +33,27 @@ public class Token extends AggregateRoot<Long> {
         return expiresAt;
     }
 
+    public String getContent() {
+        return content;
+    }
+
+    public String getJti() {
+        return jti;
+    }
+
+    public Long getSubject() {
+        return subject;
+    }
+
     public void setIssuedAt(LocalDateTime issuedAt) {
-        if (issuedAt.isBefore(LocalDateTime.now())) {
+        if (issuedAt != null && issuedAt.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("issuedAt must be in the future");
         }
         this.issuedAt = issuedAt;
     }
 
     public void setExpiresAt(LocalDateTime expiresAt) {
-        if (expiresAt.isBefore(LocalDateTime.now())) {
+        if (expiresAt != null && expiresAt.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("expiresAt must be in the future");
         }
         this.expiresAt = expiresAt;

@@ -66,7 +66,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AggregateException.class)
     public ResponseEntity<Map<String, String>> handleAggregateException(AggregateException exception) {
-        LOGGER.error(exception.getMessage(), exception);
+        for (var ex : exception.getExceptions()) {
+            LOGGER.error(ex.getLocalizedMessage(), ex);
+        }
+
         Throwable cause = exception.getExceptions().getFirst();
         LOGGER.debug("AggregateException contains {} exceptions, handling the first one: {}", exception.getExceptions().size(), cause.getMessage());
         return handleGeneralException(cause);

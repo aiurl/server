@@ -81,7 +81,7 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
                     throw new CredentialNotFoundException(request.username(), "Invalid username or password.");
                 }
 
-                if (userInfo.getLockedUntil().isAfter(LocalDateTime.now())) {
+                if (userInfo.getLockedUntil() != null && userInfo.getLockedUntil().isAfter(LocalDateTime.now())) {
                     throw new AccountLockedException(request.username(), "Account is locked until " + userInfo.getLockedUntil());
                 }
 
@@ -92,12 +92,16 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
                     }
                 }
 
-                events.add(new UserAuthSuccessEvent(request.grantType(), userInfo.getId()));
-
                 var jwtId = ObjectId.guid().toString();
                 var iat = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
                 var exp = LocalDateTime.now().plusHours(24).toEpochSecond(ZoneOffset.UTC);
                 var accessToken = generateToken(jwtId, userInfo, iat, exp);
+
+                var event = new UserAuthSuccessEvent(request.grantType(), userInfo.getId());
+                event.setGrantTime(LocalDateTime.now());
+                event.getData().put("jti", jwtId);
+                event.getData().put("jwt", accessToken);
+                events.add(event);
 
                 return new TokenGrantResponseDto(accessToken, jwtId, "Bearer", 3600 * 24, iat, userInfo.getUsername(), userInfo.getId());
 
