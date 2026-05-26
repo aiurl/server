@@ -1,19 +1,19 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.TokenCreateCommand;
 import io.theurl.identity.domain.aggregate.Token;
 import io.theurl.identity.domain.repository.TokenRepository;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.concurrent.CompletableFuture;
 
 @Component
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(BeanScope.PROTOTYPE)
+//@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class TokenCreateCommandHandler implements Handler<TokenCreateCommand, Void> {
 
     @Resource
