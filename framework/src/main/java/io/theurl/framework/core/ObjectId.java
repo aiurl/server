@@ -55,4 +55,9 @@ public final class ObjectId {
         ObjectId objectId = (ObjectId) obj;
         return value.equals(objectId.value);
     }
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
 }
