@@ -9,12 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class UserUnlockedEvent extends DomainEvent {
+public final class UserUnlockedEvent extends DomainEvent {
     private final Long id;
     private final LocalDateTime unlockTime;
-
-    @Override
-    public <ID extends Comparable<ID>> void attach(IAggregateRoot<ID> aggregateRoot) {
-
-    }
 }

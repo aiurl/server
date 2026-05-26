@@ -24,9 +24,7 @@ public class MediatorConfiguration {
             .use(() -> handlers.stream())
             .use(() -> middlewares.stream())
             .use(() -> validators.stream())
-            .use(event -> CompletableFuture.runAsync(() -> {
-                publisher.publishEvent(event);
-            }, taskExecutor().getThreadPoolExecutor()));
+            .use(event -> CompletableFuture.runAsync(() -> publisher.publishEvent(event), taskExecutor().getThreadPoolExecutor()));
     }
 
     @Bean(name = "taskExecutor")
