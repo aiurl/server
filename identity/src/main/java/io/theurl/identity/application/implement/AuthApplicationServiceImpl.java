@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.annotation.RequestScope;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -192,7 +193,7 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
         Assert.notNull(signingKey, "SigningKey cannot be null");
 
         var builder = Jwts.builder();
-        builder.subject(String.valueOf(user.getId())).id(id).issuer(issuer).issuedAt(new Date(issuedAt)).expiration(new Date(expiresAt)) // 24小时后过期
+        builder.subject(String.valueOf(user.getId())).id(id).issuer(issuer).issuedAt(Date.from(Instant.ofEpochSecond(issuedAt))).expiration(Date.from(Instant.ofEpochSecond(expiresAt))) // 24小时后过期
                .claim("name", user.getUsername());
         builder.signWith(Keys.hmacShaKeyFor(signingKey.getBytes()));
         return builder.compact();

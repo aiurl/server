@@ -1,6 +1,7 @@
 package io.theurl.framework.application;
 
 import com.neroyun.mediator.Mediator;
+import io.theurl.framework.security.CredentialExpiredException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -43,5 +44,13 @@ public class BaseApplicationService implements ApplicationService {
             return null;
         }
         return request.getUserPrincipal();
+    }
+
+    protected Long currentUserId() {
+        var principal = currentUser();
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new CredentialExpiredException(null, "Unauthenticated request.");
+        }
+        return Long.parseLong(principal.getName());
     }
 }
