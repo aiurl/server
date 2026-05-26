@@ -1,4 +1,4 @@
-package io.theurl.identity.interfaces.dto;
+package io.theurl.identity.application.dto;
 
 /**
  * DTO for token grant response

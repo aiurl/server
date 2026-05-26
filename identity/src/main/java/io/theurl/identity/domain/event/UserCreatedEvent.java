@@ -1,13 +1,14 @@
 package io.theurl.identity.domain.event;
 
 import io.theurl.framework.domain.DomainEvent;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-public class UserCreatedEvent extends DomainEvent {
+@AllArgsConstructor
+public final class UserCreatedEvent extends DomainEvent {
     private final String username;
-
-    public UserCreatedEvent(String username) {
-        this.username = username;
-    }
+    private final String nickname;
+    private final String email;
+    private final String phone;
 }

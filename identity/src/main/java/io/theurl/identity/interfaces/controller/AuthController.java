@@ -1,8 +1,8 @@
 package io.theurl.identity.interfaces.controller;
 
 import io.theurl.identity.application.contract.AuthApplicationService;
-import io.theurl.identity.interfaces.dto.TokenGrantRequestDto;
-import io.theurl.identity.interfaces.dto.TokenGrantResponseDto;
+import io.theurl.identity.application.dto.TokenGrantRequestDto;
+import io.theurl.identity.application.dto.TokenGrantResponseDto;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

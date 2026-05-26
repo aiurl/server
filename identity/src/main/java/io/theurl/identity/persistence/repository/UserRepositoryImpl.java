@@ -4,6 +4,8 @@ import io.theurl.framework.utility.Cryptography;
 import io.theurl.framework.utility.RandomUtility;
 import io.theurl.identity.domain.aggregate.User;
 import io.theurl.identity.domain.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Repository;
@@ -13,6 +15,9 @@ import org.springframework.stereotype.Repository;
 public class UserRepositoryImpl implements UserRepository {
     private final JpaUserRepository repository;
     private final ModelMapper mapper;
+
+    @PersistenceContext
+    private EntityManager context;
 
     @Override
     public void save(User user) {

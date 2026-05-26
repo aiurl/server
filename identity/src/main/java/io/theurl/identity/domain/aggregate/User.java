@@ -36,11 +36,27 @@ public class User extends AggregateRoot<Long> {
         registerEvent(UserEmailChangedEvent.class, event -> this.email = event.getNewEmail());
     }
 
-    public static User create(String username) {
+    /**
+     * Creates a new user with the given parameters and raises a UserCreatedEvent.
+     *
+     * @param username the username of the new user
+     * @param nickname the nickname of the new user
+     * @param email    the email of the new user
+     * @param phone    the phone number of the new user
+     * @return the newly created user
+     */
+    public static User create(String username, String nickname, String email, String phone) {
         var id = SnowflakeId.getInstance().nextId();
         var user = new User(id);
         user.setUsername(username);
-        user.raiseEvent(new UserCreatedEvent(username));
+        user.setNickname(nickname);
+        if (email != null && !email.isEmpty()) {
+            user.setEmail(email);
+        }
+        if (phone != null && !phone.isEmpty()) {
+            user.setPhone(phone);
+        }
+        user.raiseEvent(new UserCreatedEvent(username, nickname, email, phone));
         return user;
     }
 

@@ -32,15 +32,8 @@ public class UserCreateCommandHandler implements Handler<UserCreateCommand, Void
             throw new IllegalArgumentException("User with the same username, email or phone already exists.");
         }
 
-        var user = User.create(message.getUsername());
+        var user = User.create(message.getUsername(), message.getNickname(), message.getEmail(), message.getPhone());
         user.setPassword(message.getPassword(), "init");
-        user.setNickname(message.getNickname());
-        if (message.getEmail() != null) {
-            user.setEmail(message.getEmail());
-        }
-        if (message.getPhone() != null) {
-            user.setPhone(message.getPhone());
-        }
         repository.save(user);
         return CompletableFuture.completedFuture(null);
     }
