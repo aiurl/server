@@ -10,7 +10,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Security配置：开启JWT无状态鉴权，并放行登录注册与Swagger相关端点。
+ * The security configuration for the application, defining the security filter chain and authentication rules.
+ * <p>
+ * This configuration disables CSRF, form login, and HTTP basic authentication, and sets the session management to stateless.
+ * It also configures exception handling to return a 401 Unauthorized response for unauthenticated requests.
+ * The authorization rules allow unauthenticated access to specific endpoints (e.g., authentication and registration endpoints, API documentation) while requiring authentication for all other requests.
+ * The JwtAuthenticationFilter is added to the filter chain before the UsernamePasswordAuthenticationFilter to handle JWT token parsing and authentication.
+ * </p>
  */
 @Configuration
 public class SecurityConfiguration {

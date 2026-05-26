@@ -7,12 +7,13 @@ import io.theurl.identity.persistence.query.UserDetailQuery;
 import io.theurl.identity.persistence.repository.JpaUserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
 
 @Component
-@Scope(BeanScope.PROTOTYPE)
+@Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserDetailQueryHandler implements Handler<UserDetailQuery, UserDetail> {
     private final JpaUserRepository repository;
     private final ModelMapper mapper;

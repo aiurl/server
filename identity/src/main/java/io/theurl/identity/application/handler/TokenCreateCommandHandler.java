@@ -7,13 +7,13 @@ import io.theurl.identity.domain.aggregate.Token;
 import io.theurl.identity.domain.repository.TokenRepository;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
 
 @Component
-@Scope(BeanScope.PROTOTYPE)
-//@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class TokenCreateCommandHandler implements Handler<TokenCreateCommand, Void> {
 
     @Resource

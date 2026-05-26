@@ -1,6 +1,7 @@
 package io.theurl.identity.persistence.handler;
 
 import com.neroyun.mediator.Handler;
+import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.persistence.entity.User;
 import io.theurl.identity.persistence.entity.UserRole;
 import io.theurl.identity.persistence.model.UserAuthInfo;
@@ -22,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Component
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserAuthInfoQueryHandler implements Handler<UserAuthInfoQuery, UserAuthInfo> {
 
     @PersistenceContext

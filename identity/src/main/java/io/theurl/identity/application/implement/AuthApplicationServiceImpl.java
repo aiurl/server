@@ -55,109 +55,108 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
 
     @Override
     public CompletableFuture<TokenGrantResponseDto> grant(TokenGrantRequestDto request) {
-        return CompletableFuture.supplyAsync(() -> {
-            var events = new ArrayList<Event>();
-            try {
+        var events = new ArrayList<Event>();
+        try {
 
-                UserAuthInfoQuery query = switch (request.grantType().toLowerCase()) {
-                    case null -> throw new IllegalArgumentException("Grant type is required");
-                    case "" -> throw new IllegalArgumentException("Grant type is required");
-                    case "password" -> {
-                        if (request.username() == null || request.username().isEmpty()) {
-                            throw new IllegalArgumentException("Username is required for username grant type");
-                        }
-                        yield new UserAuthInfoQuery("username", request.username());
+            UserAuthInfoQuery query = switch (request.grantType().toLowerCase()) {
+                case null -> throw new IllegalArgumentException("Grant type is required");
+                case "" -> throw new IllegalArgumentException("Grant type is required");
+                case "password" -> {
+                    if (request.username() == null || request.username().isEmpty()) {
+                        throw new IllegalArgumentException("Username is required for username grant type");
                     }
-                    case "email", "phone" ->
-                        // For email and phone grant types, we should check OTP or other verification methods before querying user info.
-                        checkCodeAsync(request).thenApply(_ -> new UserAuthInfoQuery(request.grantType(), request.username())).join();
-                    case "github", "microsoft", "google", "facebook" ->
-                        authWithExternalAsync(request.grantType(), request.username()).thenApply(userId -> new UserAuthInfoQuery(request.grantType(), userId)).join();
-                    default -> throw new IllegalArgumentException("Unsupported grant type: " + request.grantType());
-                };
-
-                var userInfo = mediator.executeAsync(query).join();
-
-                if (userInfo == null) {
-                    throw new CredentialNotFoundException(request.username(), "Invalid username or password.");
+                    yield new UserAuthInfoQuery("username", request.username());
                 }
+                case "email", "phone" ->
+                    // For email and phone grant types, we should check OTP or other verification methods before querying user info.
+                    checkCodeAsync(request).thenApply(_ -> new UserAuthInfoQuery(request.grantType(), request.username())).join();
+                case "github", "microsoft", "google", "facebook" ->
+                    authWithExternalAsync(request.grantType(), request.username()).thenApply(userId -> new UserAuthInfoQuery(request.grantType(), userId)).join();
+                default -> throw new IllegalArgumentException("Unsupported grant type: " + request.grantType());
+            };
 
-                if (userInfo.getLockedUntil() != null && userInfo.getLockedUntil().isAfter(LocalDateTime.now())) {
-                    throw new AccountLockedException(request.username(), "Account is locked until " + userInfo.getLockedUntil());
-                }
+            var userInfo = mediator.executeAsync(query).join();
 
-                if (request.grantType().equals("password")) {
-                    var passwordHash = Cryptography.AES.encrypt(request.password(), userInfo.getPasswordSalt());
-                    if (!passwordHash.equals(userInfo.getPasswordHash())) {
-                        throw new CredentialIncorrectException("Invalid username or password.");
-                    }
-                }
+            if (userInfo == null) {
+                throw new CredentialNotFoundException(request.username(), "Invalid username or password.");
+            }
 
-                var jwtId = ObjectId.guid().toString();
-                var iat = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-                var exp = LocalDateTime.now().plusHours(24).toEpochSecond(ZoneOffset.UTC);
-                var accessToken = generateToken(jwtId, userInfo, iat, exp);
+            if (userInfo.getLockedUntil() != null && userInfo.getLockedUntil().isAfter(LocalDateTime.now())) {
+                throw new AccountLockedException(request.username(), "Account is locked until " + userInfo.getLockedUntil());
+            }
 
-                var event = new UserAuthSuccessEvent(request.grantType(), userInfo.getId());
-                event.setGrantTime(LocalDateTime.now());
-                event.getData().put("jti", jwtId);
-                event.getData().put("jwt", accessToken);
-                events.add(event);
-
-                return new TokenGrantResponseDto(accessToken, jwtId, "Bearer", 3600 * 24, iat, userInfo.getUsername(), userInfo.getId());
-
-            } catch (Exception e) {
-                var event = new UserAuthFailureEvent();
-
-                handleException(e, ex -> {
-                    switch (ex) {
-                        case AccountLockedException exception:
-                            event.setUserId((Long) exception.getIdentity());
-                            event.setGrantType(request.grantType());
-                            event.setGrantTime(LocalDateTime.now());
-                            event.setError(exception.getLocalizedMessage());
-                            event.setData(Map.of("username", request.username() != null ? request.username() : "", "password", request.password(), "locked", "true"));
-                            break;
-                        case NoResultException ignored:
-                            event.setUsername(request.username());
-                            event.setGrantType(request.grantType());
-                            event.setGrantTime(LocalDateTime.now());
-                            event.setError(ex.getLocalizedMessage());
-                            event.setData(Map.of("username", request.username()));
-                            break;
-                        case EntityNotFoundException ignored:
-                            event.setUsername(request.username());
-                            event.setGrantType(request.grantType());
-                            event.setGrantTime(LocalDateTime.now());
-                            event.setError(ex.getLocalizedMessage());
-                            event.setData(Map.of("username", request.username()));
-                            break;
-                        case AccountNotFoundException ignored:
-                            event.setUsername(request.username());
-                            event.setGrantType(request.grantType());
-                            event.setGrantTime(LocalDateTime.now());
-                            event.setError(ex.getLocalizedMessage());
-                            event.setData(Map.of("username", request.username()));
-                            break;
-                        case CredentialException exception:
-                            event.setUsername(request.username());
-                            event.setGrantType(request.grantType());
-                            event.setGrantTime(LocalDateTime.now());
-                            event.setError(exception.getLocalizedMessage());
-                            event.setData(Map.of("username", request.username(), "password", request.password()));
-                            break;
-                        default:
-                            break;
-                    }
-                });
-                log.error("Error while processing request", e);
-                throw new AggregateException(List.of(e));
-            } finally {
-                if (!events.isEmpty()) {
-                    events.parallelStream().forEach(mediator::publishAsync);
+            if (request.grantType().equals("password")) {
+                var passwordHash = Cryptography.AES.encrypt(request.password(), userInfo.getPasswordSalt());
+                if (!passwordHash.equals(userInfo.getPasswordHash())) {
+                    throw new CredentialIncorrectException("Invalid username or password.");
                 }
             }
-        }, mediatorTaskExecutor.getThreadPoolExecutor());
+
+            var jwtId = ObjectId.guid().toString();
+            var iat = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+            var exp = LocalDateTime.now().plusHours(24).toEpochSecond(ZoneOffset.UTC);
+            var accessToken = generateToken(jwtId, userInfo, iat, exp);
+
+            var event = new UserAuthSuccessEvent(request.grantType(), userInfo.getId());
+            event.setGrantTime(LocalDateTime.now());
+            event.getData().put("jti", jwtId);
+            event.getData().put("jwt", accessToken);
+            events.add(event);
+
+            var result = new TokenGrantResponseDto(accessToken, jwtId, "Bearer", 3600 * 24, iat, userInfo.getUsername(), userInfo.getId());
+
+            return CompletableFuture.completedFuture(result);
+        } catch (Exception e) {
+            var event = new UserAuthFailureEvent();
+
+            handleException(e, ex -> {
+                switch (ex) {
+                    case AccountLockedException exception:
+                        event.setUserId((Long) exception.getIdentity());
+                        event.setGrantType(request.grantType());
+                        event.setGrantTime(LocalDateTime.now());
+                        event.setError(exception.getLocalizedMessage());
+                        event.setData(Map.of("username", request.username() != null ? request.username() : "", "password", request.password(), "locked", "true"));
+                        break;
+                    case NoResultException ignored:
+                        event.setUsername(request.username());
+                        event.setGrantType(request.grantType());
+                        event.setGrantTime(LocalDateTime.now());
+                        event.setError(ex.getLocalizedMessage());
+                        event.setData(Map.of("username", request.username()));
+                        break;
+                    case EntityNotFoundException ignored:
+                        event.setUsername(request.username());
+                        event.setGrantType(request.grantType());
+                        event.setGrantTime(LocalDateTime.now());
+                        event.setError(ex.getLocalizedMessage());
+                        event.setData(Map.of("username", request.username()));
+                        break;
+                    case AccountNotFoundException ignored:
+                        event.setUsername(request.username());
+                        event.setGrantType(request.grantType());
+                        event.setGrantTime(LocalDateTime.now());
+                        event.setError(ex.getLocalizedMessage());
+                        event.setData(Map.of("username", request.username()));
+                        break;
+                    case CredentialException exception:
+                        event.setUsername(request.username());
+                        event.setGrantType(request.grantType());
+                        event.setGrantTime(LocalDateTime.now());
+                        event.setError(exception.getLocalizedMessage());
+                        event.setData(Map.of("username", request.username(), "password", request.password()));
+                        break;
+                    default:
+                        break;
+                }
+            });
+            log.error("Error while processing request", e);
+            throw new AggregateException(List.of(e));
+        } finally {
+            if (!events.isEmpty()) {
+                events.parallelStream().forEach(mediator::publishAsync);
+            }
+        }
     }
 
     CompletableFuture<Void> checkCodeAsync(TokenGrantRequestDto request) {

@@ -1,6 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.UserPasswordChangeCommand;
 import io.theurl.identity.domain.repository.UserRepository;
 import org.springframework.context.annotation.Scope;
@@ -11,7 +12,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.concurrent.CompletableFuture;
 
 @Component
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserPasswordChangeCommandHandler implements Handler<UserPasswordChangeCommand, Void> {
 
     private final UserRepository repository;
