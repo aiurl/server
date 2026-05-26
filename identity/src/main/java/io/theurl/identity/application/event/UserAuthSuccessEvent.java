@@ -4,8 +4,10 @@ import com.neroyun.mediator.Event;
 import io.theurl.framework.domain.ApplicationEvent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
@@ -14,7 +16,6 @@ public final class UserAuthSuccessEvent extends ApplicationEvent implements Even
     private final String grantType;
     private final Long userId;
 
-
     public UserAuthSuccessEvent(String grantType, Long userId) {
         this.grantType = grantType;
         this.userId = userId;
@@ -22,5 +23,7 @@ public final class UserAuthSuccessEvent extends ApplicationEvent implements Even
 
     private String username;
     private LocalDateTime grantTime;
-    private Map<String, String> data;
+
+    @Getter
+    private Map<String, String> data = new HashMap<>();
 }
