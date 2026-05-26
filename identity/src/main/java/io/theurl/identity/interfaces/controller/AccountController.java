@@ -18,7 +18,8 @@ public class AccountController {
 
     @PostMapping("/register")
     public ResponseEntity<Void> create(@RequestBody UserCreateRequestDto user) {
-        service.createAsync(user);
+        service.createAsync(user)
+               .join();
         return ResponseEntity.ok().build();
     }
 
@@ -31,7 +32,8 @@ public class AccountController {
 
     @PostMapping("/password/change")
     public ResponseEntity<Void> changePassword(@RequestBody UserPasswordChangeRequestDto user) {
-        // Implement password change logic here, e.g., call a method in the service to handle password change
+        service.changePasswordAsync(user.getOldPassword(), user.getNewPassword())
+               .join();
         return ResponseEntity.ok().build();
     }
 

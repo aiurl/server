@@ -13,7 +13,43 @@ public class UserMapProfile {
 
     @PostConstruct
     public void configure() {
-        Provider<io.theurl.identity.domain.aggregate.User> userProvider = request -> new io.theurl.identity.domain.aggregate.User((Long) request.getSource());
+        Provider<io.theurl.identity.domain.aggregate.User> userProvider = request -> new io.theurl.identity.domain.aggregate.User(
+            ((io.theurl.identity.persistence.entity.User) request.getSource()).getId()
+        );
+        Provider<io.theurl.identity.domain.aggregate.UserRole> userRoleProvider = request -> new io.theurl.identity.domain.aggregate.UserRole(
+            ((io.theurl.identity.persistence.entity.UserRole) request.getSource()).getId(),
+            ((io.theurl.identity.persistence.entity.UserRole) request.getSource()).getName()
+        );
+        Provider<io.theurl.identity.domain.aggregate.UserAuthority> userAuthorityProvider = request -> new io.theurl.identity.domain.aggregate.UserAuthority(
+            ((io.theurl.identity.persistence.entity.UserAuthority) request.getSource()).getId(),
+            ((io.theurl.identity.persistence.entity.UserAuthority) request.getSource()).getProvider(),
+            ((io.theurl.identity.persistence.entity.UserAuthority) request.getSource()).getOpenId()
+        );
+
+        mapper.createTypeMap(io.theurl.identity.persistence.entity.UserRole.class, io.theurl.identity.domain.aggregate.UserRole.class)
+              .setProvider(userRoleProvider);
+
+        mapper.createTypeMap(io.theurl.identity.domain.aggregate.UserRole.class, io.theurl.identity.persistence.entity.UserRole.class)
+              .addMappings(expression -> {
+                  expression.map(io.theurl.identity.domain.aggregate.UserRole::getId, io.theurl.identity.persistence.entity.UserRole::setId);
+                  expression.map(io.theurl.identity.domain.aggregate.UserRole::getName, io.theurl.identity.persistence.entity.UserRole::setName);
+                  expression.skip(io.theurl.identity.persistence.entity.UserRole::setUserId);
+              });
+
+        mapper.createTypeMap(io.theurl.identity.persistence.entity.UserAuthority.class, io.theurl.identity.domain.aggregate.UserAuthority.class)
+              .setProvider(userAuthorityProvider)
+              .addMappings(expression -> {
+                  expression.map(io.theurl.identity.persistence.entity.UserAuthority::getName, io.theurl.identity.domain.aggregate.UserAuthority::setName);
+              });
+
+        mapper.createTypeMap(io.theurl.identity.domain.aggregate.UserAuthority.class, io.theurl.identity.persistence.entity.UserAuthority.class)
+              .addMappings(expression -> {
+                  expression.map(io.theurl.identity.domain.aggregate.UserAuthority::getId, io.theurl.identity.persistence.entity.UserAuthority::setId);
+                  expression.map(io.theurl.identity.domain.aggregate.UserAuthority::getProvider, io.theurl.identity.persistence.entity.UserAuthority::setProvider);
+                  expression.map(io.theurl.identity.domain.aggregate.UserAuthority::getOpenId, io.theurl.identity.persistence.entity.UserAuthority::setOpenId);
+                  expression.map(io.theurl.identity.domain.aggregate.UserAuthority::getName, io.theurl.identity.persistence.entity.UserAuthority::setName);
+                  expression.skip(io.theurl.identity.persistence.entity.UserAuthority::setUserId);
+              });
 
         mapper.createTypeMap(io.theurl.identity.persistence.entity.User.class, io.theurl.identity.domain.aggregate.User.class)
               .setProvider(userProvider)
