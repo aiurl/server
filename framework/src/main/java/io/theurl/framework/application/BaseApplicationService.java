@@ -1,11 +1,16 @@
 package io.theurl.framework.application;
 
 import com.neroyun.mediator.Mediator;
+import io.theurl.framework.security.CredentialExpiredException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import jakarta.servlet.http.HttpServletRequest;
 
+import java.security.Principal;
 import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 
@@ -27,5 +32,25 @@ public class BaseApplicationService implements ApplicationService {
         } else {
             consumer.accept(throwable);
         }
+    }
+
+    protected HttpServletRequest getRequest() {
+        return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+    }
+
+    protected Principal currentUser() {
+        var request = getRequest();
+        if (request == null) {
+            return null;
+        }
+        return request.getUserPrincipal();
+    }
+
+    protected Long currentUserId() {
+        var principal = currentUser();
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new CredentialExpiredException(null, "Unauthenticated request.");
+        }
+        return Long.parseLong(principal.getName());
     }
 }

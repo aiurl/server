@@ -6,6 +6,8 @@ import org.modelmapper.Provider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class UserMapProfile {
     @Autowired
@@ -74,5 +76,11 @@ public class UserMapProfile {
                   expression.map(io.theurl.identity.domain.aggregate.User::getLockedUntil, io.theurl.identity.persistence.entity.User::setLockedUntil);
                   expression.map(io.theurl.identity.domain.aggregate.User::getRoles, io.theurl.identity.persistence.entity.User::setRoles);
               });
+
+        mapper.createTypeMap(io.theurl.identity.persistence.entity.User.class, io.theurl.identity.persistence.model.UserDetail.class)
+              .addMappings(expression -> {
+                  expression.map(src -> src.getRoles() == null ? List.of() : src.getRoles().stream().map(io.theurl.identity.persistence.entity.UserRole::getName).toList(), io.theurl.identity.persistence.model.UserDetail::setRoles);
+              });
+
     }
 }

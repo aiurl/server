@@ -1,6 +1,7 @@
 package io.theurl.identity.persistence.handler;
 
 import com.neroyun.mediator.Handler;
+import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.persistence.model.OnetimePasswordDetail;
 import io.theurl.identity.persistence.query.OnetimePasswordDetailQuery;
 import jakarta.persistence.EntityManager;
@@ -14,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.concurrent.CompletableFuture;
 
 @Component
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class OnetimePasswordDetailQueryHandler implements Handler<OnetimePasswordDetailQuery, OnetimePasswordDetail> {
 
     @PersistenceContext

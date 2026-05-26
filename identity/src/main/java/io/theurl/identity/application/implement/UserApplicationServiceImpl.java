@@ -36,14 +36,14 @@ public class UserApplicationServiceImpl extends BaseApplicationService implement
 
     @Override
     public CompletableFuture<UserProfileResponseDto> getProfileAsync() {
-        var query = new UserDetailQuery(1L);
+        var query = new UserDetailQuery(currentUserId());
         return mediator.executeAsync(query)
                        .thenApply(userDetail -> mapper.map(userDetail, UserProfileResponseDto.class));
     }
 
     @Override
     public CompletableFuture<Void> changePasswordAsync(String oldPassword, String newPassword) {
-        mediator.executeAsync(new UserAuthInfoQuery("id", ""))
+        mediator.executeAsync(new UserAuthInfoQuery("id", String.valueOf(currentUserId())))
                 .thenAccept(userDetail -> {
                     if (userDetail == null) {
                         throw new IllegalStateException("User not found.");
@@ -59,7 +59,7 @@ public class UserApplicationServiceImpl extends BaseApplicationService implement
                 })
                 .join();
 
-        var command = new UserPasswordChangeCommand(1L, newPassword, "change");
+        var command = new UserPasswordChangeCommand(currentUserId(), newPassword, "change");
         return mediator.sendAsync(command);
     }
 }

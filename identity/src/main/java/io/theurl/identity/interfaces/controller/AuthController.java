@@ -1,5 +1,6 @@
 package io.theurl.identity.interfaces.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.theurl.identity.application.contract.AuthApplicationService;
 import io.theurl.identity.application.dto.TokenGrantRequestDto;
 import io.theurl.identity.application.dto.TokenGrantResponseDto;
@@ -25,6 +26,7 @@ public class AuthController {
      * @return A response containing the access token and refresh token.
      */
     @PostMapping("token/grant")
+    @Operation(summary = "Grant access token", security = {})
     public TokenGrantResponseDto grantToken(@RequestBody TokenGrantRequestDto request) {
         return service.grant(request).join();
     }
@@ -38,6 +40,7 @@ public class AuthController {
      * @return A response containing the new access token and refresh token.
      */
     @PostMapping("token/refresh")
+    @Operation(summary = "Refresh access token", security = {})
     public TokenGrantResponseDto refreshToken(@RequestParam String token) {
         var request = new TokenGrantRequestDto(token, null, "refresh_token", null);
         return service.grant(request).join();

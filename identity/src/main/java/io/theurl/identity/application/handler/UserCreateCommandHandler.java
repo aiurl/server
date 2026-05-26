@@ -1,6 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.UserCreateCommand;
 import io.theurl.identity.domain.aggregate.User;
 import io.theurl.identity.domain.repository.UserRepository;
@@ -14,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.concurrent.CompletableFuture;
 
 @Component
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserCreateCommandHandler implements Handler<UserCreateCommand, Void> {
     private final UserRepository repository;
 

@@ -4,6 +4,8 @@ import io.theurl.identity.application.contract.UserApplicationService;
 import io.theurl.identity.application.dto.UserCreateRequestDto;
 import io.theurl.identity.application.dto.UserPasswordChangeRequestDto;
 import io.theurl.identity.application.dto.UserProfileResponseDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,7 @@ public class AccountController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new user", security = {})
     public ResponseEntity<Void> create(@RequestBody UserCreateRequestDto user) {
         service.createAsync(user)
                .join();
@@ -24,6 +27,7 @@ public class AccountController {
     }
 
     @GetMapping("/profile")
+    @Operation(summary = "Get current profile", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<UserProfileResponseDto> getProfile() {
         var profileFuture = service.getProfileAsync();
         var profile = profileFuture.join();
@@ -31,6 +35,7 @@ public class AccountController {
     }
 
     @PostMapping("/password/change")
+    @Operation(summary = "Change current password", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Void> changePassword(@RequestBody UserPasswordChangeRequestDto user) {
         service.changePasswordAsync(user.getOldPassword(), user.getNewPassword())
                .join();
