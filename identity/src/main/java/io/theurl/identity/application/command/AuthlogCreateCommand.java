@@ -5,8 +5,12 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * Command to create an authentication log entry, capturing details of an authentication attempt.
+ * This command is typically used after an authentication attempt (successful or failed) to record the event in the system for auditing and monitoring purposes.
+ */
 @Data
-public final class AuthlogCreateCommand implements Command {
+public class AuthlogCreateCommand implements Command {
     private Long userId;
     private String username;
     private String grantType;

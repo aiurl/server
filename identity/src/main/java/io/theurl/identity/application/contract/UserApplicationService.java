@@ -6,6 +6,11 @@ import io.theurl.identity.application.dto.UserProfileResponseDto;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * UserApplicationService defines the contract for user-related operations in the application layer.
+ * It provides asynchronous methods for creating users, retrieving user profiles, and updating user information such as password, email, phone number, and nickname.
+ * Additionally, it includes methods for connecting and removing authorities associated with the user.
+ */
 public interface UserApplicationService extends ApplicationService {
 
     /**
@@ -56,7 +61,21 @@ public interface UserApplicationService extends ApplicationService {
      */
     CompletableFuture<Void> changeNicknameAsync(String nickname);
 
+    /**
+     * Connect an authority to the currently authenticated user asynchronously.
+     *
+     * @param provider The authority provider to connect.
+     * @param code     The authorization code for the authority.
+     * @return A CompletableFuture representing the asynchronous operation.
+     */
     CompletableFuture<Void> connectAuthorityAsync(String provider, String code);
 
+    /**
+     * Remove an authority from the currently authenticated user asynchronously.
+     *
+     * @param provider The authority provider to remove.
+     * @param openId   The open ID of the authority to remove.
+     * @return A CompletableFuture representing the asynchronous operation.
+     */
     CompletableFuture<Void> removeAuthorityAsync(String provider, String openId);
 }

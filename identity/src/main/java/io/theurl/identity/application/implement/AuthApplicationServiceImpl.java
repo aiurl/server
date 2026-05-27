@@ -10,6 +10,7 @@ import io.theurl.framework.security.*;
 import io.theurl.framework.utility.Cryptography;
 import io.theurl.framework.utility.DateTimeUtility;
 import io.theurl.framework.utility.RegexUtility;
+import io.theurl.identity.application.command.TokenRevokeCommand;
 import io.theurl.identity.application.contract.AuthApplicationService;
 import io.theurl.identity.application.event.TokenGrantedEvent;
 import io.theurl.identity.application.event.TokenRefreshedEvent;
@@ -170,6 +171,19 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
         }
     }
 
+    @Override
+    public CompletableFuture<Void> revoke(String jti) {
+        var command = new TokenRevokeCommand(jti, TokenStatus.LOGOUT);
+        return mediator.sendAsync(command);
+    }
+
+    /**
+     * Check the one-time password (OTP) for phone or email verification.
+     * The method retrieves the OTP details using the request ID and validates the OTP against the provided code, recipient, and expiration time. If any validation fails, a CredentialIncorrectException is thrown with an appropriate message.
+     *
+     * @param request The token grant request containing the OTP details.
+     * @return A CompletableFuture that completes when the OTP is successfully validated.
+     */
     CompletableFuture<Void> checkCodeAsync(TokenGrantRequestDto request) {
         return mediator.executeAsync(new OnetimePasswordDetailQuery(request.requestId())).thenAccept(otp -> {
             if (otp == null) {
@@ -190,6 +204,14 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
         });
     }
 
+    /**
+     * Authenticate the user with an external provider based on the grant type and username (which could be an OAuth code or other identifier).
+     * The method retrieves the appropriate ExternalAuthProvider bean from the application context and uses it to authenticate the user asynchronously. The result is expected to contain the user ID, which can then be used to link to an internal user account.
+     *
+     * @param grantType The type of grant used for authentication (e.g., OAuth, SAML).
+     * @param username  The username or identifier used for authentication.
+     * @return A CompletableFuture containing the user ID associated with the authenticated user.
+     */
     CompletableFuture<String> authWithExternalAsync(String grantType, String username) {
         var provider = applicationContext.getBean(("external-auth-provider-" + grantType).toLowerCase(), ExternalAuthProvider.class);
         // Here we should check if the external auth result is linked to an internal user account, and return the user ID.
@@ -197,6 +219,13 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
         return provider.authenticateAsync(username).thenApply(ExternalAuthResult::getId);
     }
 
+    /**
+     * Refresh the token by validating the provided refresh token (jti) and returning the associated user ID if valid.
+     * The method checks the token's status, expiration, and existence in the database before allowing a new access token to be issued.
+     *
+     * @param jti The unique identifier for the refresh token.
+     * @return A CompletableFuture containing the user ID associated with the valid refresh token.
+     */
     CompletableFuture<Long> refreshToken(String jti) {
         var query = new TokenDetailQuery(jti);
         return mediator.executeAsync(query)
@@ -211,18 +240,26 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
                            }
 
                            if (TokenStatus.valueOf(tokenDetail.getStatus()) == TokenStatus.REFRESHED) {
-                               throw new CredentialNotFoundException(null, "Refresh token has been revoked.") {
-                                   @Override
-                                   public Map<String, Object> getDetails() {
-                                       return Map.of("jti", jti);
-                                   }
-                               };
+                               throw new CredentialIncorrectException(tokenDetail.getSubject(), "Refresh token has been revoked.");
+                           }
+
+                           if (tokenDetail.getIssuedAt().plusDays(30).isBefore(LocalDateTime.now())) {
+                               throw new CredentialExpiredException(tokenDetail.getSubject(), "Invalid refresh token.");
                            }
 
                            return tokenDetail.getSubject();
                        });
     }
 
+    /**
+     * Generate a JWT token for the authenticated user with the specified claims and signing key.
+     *
+     * @param id        The unique identifier for the token.
+     * @param user      The authenticated user's information.
+     * @param issuedAt  The token's issuance date.
+     * @param expiresAt The token's expiration date.
+     * @return The generated JWT token as a string.
+     */
     private String generateToken(String id, UserAuthInfo user, Date issuedAt, Date expiresAt) {
         Assert.notNull(user, "user cannot be null");
         //var signingKey = environment.getProperty("JwtAuthenticationOptions.SigningKey");
@@ -245,6 +282,11 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
         return builder.compact();
     }
 
+    /**
+     * Validate the token grant request based on the grant type and required fields.
+     *
+     * @param request The token grant request to validate.
+     */
     private void checkRequest(TokenGrantRequestDto request) {
         Assert.notNull(request, "request cannot be null");
         Assert.notNull(request.grantType(), "grantType cannot be null");

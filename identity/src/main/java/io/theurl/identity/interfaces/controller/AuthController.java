@@ -26,7 +26,7 @@ public class AuthController {
      * @return A response containing the access token and refresh token.
      */
     @PostMapping("token/grant")
-    @Operation(summary = "Grant access token", security = {})
+    @Operation(summary = "Grant access token")
     public TokenGrantResponseDto grantToken(@RequestBody TokenGrantRequestDto request) {
         return service.grant(request).join();
     }
@@ -40,9 +40,22 @@ public class AuthController {
      * @return A response containing the new access token and refresh token.
      */
     @PostMapping("token/refresh")
-    @Operation(summary = "Refresh access token", security = {})
+    @Operation(summary = "Refresh access token")
     public TokenGrantResponseDto refreshToken(@RequestParam String token) {
         var request = new TokenGrantRequestDto(token, null, "refresh_token", null);
         return service.grant(request).join();
+    }
+
+    /**
+     * Revoke an access token based on the provided token identifier (jti).
+     * This endpoint allows clients to revoke an access token, effectively invalidating it and preventing its further use for authentication and authorization.
+     * The client must provide the token identifier (jti) of the access token to be revoked, and if the token is valid, it will be marked as revoked in the system.
+     *
+     * @param jti The token identifier (jti) of the access token to be revoked.
+     */
+    @PostMapping("token/revoke")
+    @Operation(summary = "Revoke access token")
+    public void revokeToken(@RequestParam String jti) {
+        service.revoke(jti).join();
     }
 }
