@@ -160,6 +160,7 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
                         break;
                 }
             });
+            events.add(event);
             log.error("Error while processing request", e);
             throw new AggregateException(List.of(e));
         } finally {
