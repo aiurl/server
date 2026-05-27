@@ -18,13 +18,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Component
 @Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class LoggingEventSubscriber {
+public class AuthlogEventSubscriber {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(LoggingEventSubscriber.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(AuthlogEventSubscriber.class);
 
     private final Mediator mediator;
 
-    public LoggingEventSubscriber(Mediator mediator) {
+    public AuthlogEventSubscriber(Mediator mediator) {
         this.mediator = mediator;
     }
 

@@ -45,12 +45,9 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
     @Value("${jwt.issuer}")
     private String issuer;
 
-    private final ApplicationContext applicationContext;
-
     @Autowired
     public AuthApplicationServiceImpl(ApplicationContext applicationContext) {
         super(applicationContext);
-        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -108,41 +105,33 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
             return CompletableFuture.completedFuture(result);
         } catch (Exception e) {
             var event = new UserAuthFailureEvent();
+            event.setGrantType(request.grantType());
+            event.setGrantTime(LocalDateTime.now());
 
             handleException(e, ex -> {
                 switch (ex) {
                     case AccountLockedException exception:
                         event.setUserId((Long) exception.getIdentity());
-                        event.setGrantType(request.grantType());
-                        event.setGrantTime(LocalDateTime.now());
                         event.setError(exception.getLocalizedMessage());
                         event.setData(Map.of("username", request.username() != null ? request.username() : "", "password", request.password(), "locked", "true"));
                         break;
                     case NoResultException ignored:
                         event.setUsername(request.username());
-                        event.setGrantType(request.grantType());
-                        event.setGrantTime(LocalDateTime.now());
                         event.setError(ex.getLocalizedMessage());
                         event.setData(Map.of("username", request.username()));
                         break;
                     case EntityNotFoundException ignored:
                         event.setUsername(request.username());
-                        event.setGrantType(request.grantType());
-                        event.setGrantTime(LocalDateTime.now());
                         event.setError(ex.getLocalizedMessage());
                         event.setData(Map.of("username", request.username()));
                         break;
                     case AccountNotFoundException ignored:
                         event.setUsername(request.username());
-                        event.setGrantType(request.grantType());
-                        event.setGrantTime(LocalDateTime.now());
                         event.setError(ex.getLocalizedMessage());
                         event.setData(Map.of("username", request.username()));
                         break;
                     case CredentialException exception:
                         event.setUsername(request.username());
-                        event.setGrantType(request.grantType());
-                        event.setGrantTime(LocalDateTime.now());
                         event.setError(exception.getLocalizedMessage());
                         event.setData(Map.of("username", request.username(), "password", request.password()));
                         break;
