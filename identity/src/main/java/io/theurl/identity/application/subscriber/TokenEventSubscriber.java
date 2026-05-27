@@ -6,15 +6,18 @@ import io.theurl.identity.application.command.TokenCreateCommand;
 import io.theurl.identity.application.command.TokenRevokeCommand;
 import io.theurl.identity.application.event.TokenGrantedEvent;
 import io.theurl.identity.application.event.TokenRefreshedEvent;
+import io.theurl.identity.domain.enums.TokenStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
-@Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(BeanScope.PROTOTYPE)
 public class TokenEventSubscriber {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenEventSubscriber.class);
     private final Mediator mediator;
 
     public TokenEventSubscriber(Mediator mediator) {
@@ -24,23 +27,30 @@ public class TokenEventSubscriber {
     @Async
     @EventListener
     public void handleUserAuthSucceedEvent(TokenGrantedEvent event) {
-        var command = new TokenCreateCommand() {{
-            setJti(event.getJti());
-            setContent(event.getContent());
-            setSubject(event.getUserId());
-            setExpiresAt(event.getExpiresAt());
-            setIssuedAt(event.getIssuedAt());
-        }};
-
-        mediator.sendAsync(command)
-                .join();
+        try {
+            var command = new TokenCreateCommand() {{
+                setJti(event.getJti());
+                setContent(event.getContent());
+                setSubject(event.getUserId());
+                setExpiresAt(event.getExpiresAt());
+                setIssuedAt(event.getIssuedAt());
+            }};
+            mediator.sendAsync(command)
+                    .join();
+        } catch (Exception exception) {
+            LOGGER.error(exception.getLocalizedMessage(), exception);
+        }
     }
 
     @Async
     @EventListener
     public void handleTokenRefreshedEvent(TokenRefreshedEvent event) {
-        var command = new TokenRevokeCommand(event.getJti(), "refreshed");
-        mediator.sendAsync(command)
-                .join();
+        try {
+            var command = new TokenRevokeCommand(event.getJti(), TokenStatus.REFRESHED);
+            mediator.sendAsync(command)
+                    .join();
+        } catch (Exception exception) {
+            LOGGER.error(exception.getLocalizedMessage(), exception);
+        }
     }
 }

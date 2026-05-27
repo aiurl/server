@@ -15,6 +15,7 @@ import io.theurl.identity.application.event.TokenGrantedEvent;
 import io.theurl.identity.application.event.TokenRefreshedEvent;
 import io.theurl.identity.application.event.UserAuthFailureEvent;
 import io.theurl.identity.application.event.UserAuthSuccessEvent;
+import io.theurl.identity.domain.enums.TokenStatus;
 import io.theurl.identity.external.ExternalAuthProvider;
 import io.theurl.identity.external.ExternalAuthResult;
 import io.theurl.identity.application.dto.TokenGrantRequestDto;
@@ -60,12 +61,7 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
         var events = new ArrayList<Event>();
         try {
             UserAuthInfoQuery query = switch (request.grantType().toLowerCase()) {
-                case "password" -> {
-                    if (request.username() == null || request.username().isEmpty()) {
-                        throw new IllegalArgumentException("Username is required for username grant type");
-                    }
-                    yield new UserAuthInfoQuery("username", request.username());
-                }
+                case "password" -> new UserAuthInfoQuery("username", request.username());
                 case "email",
                      "phone" -> // For email and phone grant types, we should check OTP or other verification methods before querying user info.
                     checkCodeAsync(request).thenApply(_ -> new UserAuthInfoQuery(request.grantType(), request.username())).join();
@@ -212,6 +208,16 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
                                    }
                                };
                            }
+
+                           if (TokenStatus.valueOf(tokenDetail.getStatus()) == TokenStatus.REFRESHED) {
+                               throw new CredentialNotFoundException(null, "Refresh token has been revoked.") {
+                                   @Override
+                                   public Map<String, Object> getDetails() {
+                                       return Map.of("jti", jti);
+                                   }
+                               };
+                           }
+
                            return tokenDetail.getSubject();
                        });
     }

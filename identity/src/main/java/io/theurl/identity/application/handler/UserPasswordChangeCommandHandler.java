@@ -4,17 +4,17 @@ import com.neroyun.mediator.Handler;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.UserPasswordChangeCommand;
 import io.theurl.identity.domain.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.concurrent.CompletableFuture;
 
 @Component
-@Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(BeanScope.PROTOTYPE)
 public class UserPasswordChangeCommandHandler implements Handler<UserPasswordChangeCommand, Void> {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserPasswordChangeCommandHandler.class);
     private final UserRepository repository;
 
     public UserPasswordChangeCommandHandler(UserRepository repository) {
@@ -23,13 +23,18 @@ public class UserPasswordChangeCommandHandler implements Handler<UserPasswordCha
 
     @Override
     public CompletableFuture<Void> handleAsync(UserPasswordChangeCommand message) {
-        var user = repository.findById(message.userId());
-        if (user == null) {
-            return CompletableFuture.completedFuture(null);
-        }
+        try {
+            var user = repository.findById(message.userId());
+            if (user == null) {
+                return CompletableFuture.completedFuture(null);
+            }
 
-        user.setPassword(message.password(), message.changeType());
-        repository.save(user);
-        return CompletableFuture.completedFuture(null);
+            user.setPassword(message.password(), message.changeType());
+            repository.save(user);
+            return CompletableFuture.completedFuture(null);
+        } catch (Exception exception) {
+            LOGGER.error(exception.getLocalizedMessage(), exception);
+            throw exception;
+        }
     }
 }
