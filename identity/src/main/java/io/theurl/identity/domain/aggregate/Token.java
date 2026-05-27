@@ -12,6 +12,8 @@ public class Token extends AggregateRoot<Long> {
     private final Long subject;
     private LocalDateTime issuedAt;
     private LocalDateTime expiresAt;
+    private LocalDateTime refreshAt;
+    private LocalDateTime revokedAt;
 
     /**
      * Initializes the aggregate with the given id.
@@ -45,6 +47,14 @@ public class Token extends AggregateRoot<Long> {
         return subject;
     }
 
+    public LocalDateTime getRefreshAt() {
+        return refreshAt;
+    }
+
+    public LocalDateTime getRevokedAt() {
+        return revokedAt;
+    }
+
     public void setIssuedAt(LocalDateTime issuedAt) {
         if (issuedAt != null && issuedAt.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("issuedAt must be in the future");
@@ -57,6 +67,14 @@ public class Token extends AggregateRoot<Long> {
             throw new IllegalArgumentException("expiresAt must be in the future");
         }
         this.expiresAt = expiresAt;
+    }
+
+    public void refresh() {
+        this.refreshAt = LocalDateTime.now();
+    }
+
+    public void revoke() {
+        this.revokedAt = LocalDateTime.now();
     }
 
     public static Token create(String jti, String content, Long subject) {
