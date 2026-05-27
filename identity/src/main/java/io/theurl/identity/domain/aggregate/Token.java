@@ -57,7 +57,7 @@ public class Token extends AggregateRoot<Long> {
     }
 
     public void setIssuedAt(LocalDateTime issuedAt) {
-        if (issuedAt != null && issuedAt.isBefore(LocalDateTime.now())) {
+        if (issuedAt != null && issuedAt.isAfter(LocalDateTime.now())) {
             throw new IllegalArgumentException("issuedAt must be in the future");
         }
         this.issuedAt = issuedAt;
@@ -68,6 +68,14 @@ public class Token extends AggregateRoot<Long> {
             throw new IllegalArgumentException("expiresAt must be in the future");
         }
         this.expiresAt = expiresAt;
+    }
+
+    public void setRevokedAt(LocalDateTime revokedAt) {
+        this.revokedAt = revokedAt;
+    }
+
+    public void setStatus(TokenStatus status) {
+        this.status = status;
     }
 
     public void revoke(TokenStatus reason) {
