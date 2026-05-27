@@ -18,10 +18,11 @@ import java.util.function.Consumer;
 @RequestScope
 public class BaseApplicationService implements ApplicationService {
     protected Mediator mediator;
-
+    protected ApplicationContext applicationContext;
     protected ThreadPoolTaskExecutor mediatorTaskExecutor;
 
     protected BaseApplicationService(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
         mediator = applicationContext.getBean(Mediator.class);
         mediatorTaskExecutor = applicationContext.getBean(ThreadPoolTaskExecutor.class);
     }
