@@ -27,6 +27,10 @@ public class AggregateRoot<ID extends Comparable<ID>> extends Entity<ID> impleme
         return List.copyOf(events);
     }
 
+    public boolean hasEvents() {
+        return events != null && !events.isEmpty();
+    }
+
     @Override
     public void clearEvents() {
         events.clear();
