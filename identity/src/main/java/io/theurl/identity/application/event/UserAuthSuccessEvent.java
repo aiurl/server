@@ -25,5 +25,17 @@ public final class UserAuthSuccessEvent extends ApplicationEvent implements Even
     private LocalDateTime grantTime;
 
     @Getter
-    private Map<String, String> data = new HashMap<>();
+    private Map<String, Object> data = new HashMap<>();
+
+    public void setData(String key, Object value) {
+        if (data == null) {
+            data = new HashMap<>();
+        }
+
+        if (value == null) {
+            return;
+        }
+
+        this.data.put(key, value);
+    }
 }

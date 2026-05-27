@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
@@ -17,4 +18,16 @@ public class UserAuthFailureEvent extends ApplicationEvent implements Event {
     private LocalDateTime grantTime;
     private Map<String, String> data;
     private String error;
+
+    public void setData(String key, Object value) {
+        if (data == null) {
+            data = new HashMap<>();
+        }
+
+        if (value == null) {
+            return;
+        }
+
+        this.data.put(key, String.valueOf(value));
+    }
 }

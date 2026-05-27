@@ -8,6 +8,7 @@ import io.theurl.framework.application.BaseApplicationService;
 import io.theurl.framework.core.ObjectId;
 import io.theurl.framework.security.*;
 import io.theurl.framework.utility.Cryptography;
+import io.theurl.framework.utility.RegexUtility;
 import io.theurl.identity.application.contract.AuthApplicationService;
 import io.theurl.identity.application.event.UserAuthFailureEvent;
 import io.theurl.identity.application.event.UserAuthSuccessEvent;
@@ -17,6 +18,7 @@ import io.theurl.identity.application.dto.TokenGrantRequestDto;
 import io.theurl.identity.application.dto.TokenGrantResponseDto;
 import io.theurl.identity.persistence.model.UserAuthInfo;
 import io.theurl.identity.persistence.query.OnetimePasswordDetailQuery;
+import io.theurl.identity.persistence.query.TokenDetailQuery;
 import io.theurl.identity.persistence.query.UserAuthInfoQuery;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.NoResultException;
@@ -52,40 +54,55 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
 
     @Override
     public CompletableFuture<TokenGrantResponseDto> grant(TokenGrantRequestDto request) {
+        checkRequest(request);
         var events = new ArrayList<Event>();
         try {
-
             UserAuthInfoQuery query = switch (request.grantType().toLowerCase()) {
-                case null -> throw new IllegalArgumentException("Grant type is required");
-                case "" -> throw new IllegalArgumentException("Grant type is required");
                 case "password" -> {
                     if (request.username() == null || request.username().isEmpty()) {
                         throw new IllegalArgumentException("Username is required for username grant type");
                     }
                     yield new UserAuthInfoQuery("username", request.username());
                 }
-                case "email", "phone" ->
-                    // For email and phone grant types, we should check OTP or other verification methods before querying user info.
+                case "email",
+                     "phone" -> // For email and phone grant types, we should check OTP or other verification methods before querying user info.
                     checkCodeAsync(request).thenApply(_ -> new UserAuthInfoQuery(request.grantType(), request.username())).join();
                 case "github", "microsoft", "google", "facebook" ->
                     authWithExternalAsync(request.grantType(), request.username()).thenApply(userId -> new UserAuthInfoQuery(request.grantType(), userId)).join();
+                case "refresh_token" ->
+                    refreshToken(request.username()).thenApply(userId -> new UserAuthInfoQuery("id", String.valueOf(userId))).join();
                 default -> throw new IllegalArgumentException("Unsupported grant type: " + request.grantType());
             };
 
             var userInfo = mediator.executeAsync(query).join();
 
             if (userInfo == null) {
-                throw new CredentialNotFoundException(request.username(), "Invalid username or password.");
+                throw new CredentialNotFoundException(null, "Invalid username or password.") {
+                    @Override
+                    public Map<String, Object> getDetails() {
+                        return Map.of("username", request.username() != null ? request.username() : "");
+                    }
+                };
             }
 
             if (userInfo.getLockedUntil() != null && userInfo.getLockedUntil().isAfter(LocalDateTime.now())) {
-                throw new AccountLockedException(request.username(), "Account is locked until " + userInfo.getLockedUntil());
+                throw new AccountLockedException(userInfo.getId(), "Account is locked until " + userInfo.getLockedUntil()) {
+                    @Override
+                    public Map<String, Object> getDetails() {
+                        return Map.of("username", userInfo.getUsername());
+                    }
+                };
             }
 
             if (request.grantType().equals("password")) {
                 var passwordHash = Cryptography.AES.encrypt(request.password(), userInfo.getPasswordSalt());
                 if (!passwordHash.equals(userInfo.getPasswordHash())) {
-                    throw new CredentialIncorrectException("Invalid username or password.");
+                    throw new CredentialIncorrectException(userInfo.getId(), "Invalid username or password.") {
+                        @Override
+                        public Map<String, Object> getDetails() {
+                            return Map.of("username", userInfo.getUsername());
+                        }
+                    };
                 }
             }
 
@@ -96,8 +113,10 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
 
             var event = new UserAuthSuccessEvent(request.grantType(), userInfo.getId());
             event.setGrantTime(LocalDateTime.now());
-            event.getData().put("jti", jwtId);
-            event.getData().put("jwt", accessToken);
+            event.setData("jti", jwtId);
+            event.setData("jwt", accessToken);
+            event.setData("iat", iat);
+            event.setData("exp", exp);
             events.add(event);
 
             var result = new TokenGrantResponseDto(accessToken, jwtId, "Bearer", 3600 * 24, iat, userInfo.getUsername(), userInfo.getId());
@@ -112,28 +131,27 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
                 switch (ex) {
                     case AccountLockedException exception:
                         event.setUserId((Long) exception.getIdentity());
+                        event.setUsername((String) exception.getDetails().get("username"));
                         event.setError(exception.getLocalizedMessage());
-                        event.setData(Map.of("username", request.username() != null ? request.username() : "", "password", request.password(), "locked", "true"));
                         break;
                     case NoResultException ignored:
                         event.setUsername(request.username());
                         event.setError(ex.getLocalizedMessage());
-                        event.setData(Map.of("username", request.username()));
                         break;
                     case EntityNotFoundException ignored:
                         event.setUsername(request.username());
                         event.setError(ex.getLocalizedMessage());
-                        event.setData(Map.of("username", request.username()));
                         break;
                     case AccountNotFoundException ignored:
                         event.setUsername(request.username());
                         event.setError(ex.getLocalizedMessage());
-                        event.setData(Map.of("username", request.username()));
                         break;
                     case CredentialException exception:
-                        event.setUsername(request.username());
+                        if (exception.getCredential() instanceof Long userId) {
+                            event.setUserId(userId);
+                        }
+                        event.setUsername((String) exception.getDetails().get("username"));
                         event.setError(exception.getLocalizedMessage());
-                        event.setData(Map.of("username", request.username(), "password", request.password()));
                         break;
                     default:
                         break;
@@ -175,6 +193,22 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
         return provider.authenticateAsync(username).thenApply(ExternalAuthResult::getId);
     }
 
+    CompletableFuture<Long> refreshToken(String jti) {
+        var query = new TokenDetailQuery(jti);
+        return mediator.executeAsync(query)
+                       .thenApply(tokenDetail -> {
+                           if (tokenDetail == null) {
+                               throw new CredentialNotFoundException(null, "Invalid refresh token.") {
+                                   @Override
+                                   public Map<String, Object> getDetails() {
+                                       return Map.of("jti", jti);
+                                   }
+                               };
+                           }
+                           return tokenDetail.getSubject();
+                       });
+    }
+
     private String generateToken(String id, UserAuthInfo user, long issuedAt, long expiresAt) {
         Assert.notNull(user, "user cannot be null");
         //var signingKey = environment.getProperty("JwtAuthenticationOptions.SigningKey");
@@ -185,5 +219,37 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
                .claim("name", user.getUsername());
         builder.signWith(Keys.hmacShaKeyFor(signingKey.getBytes()));
         return builder.compact();
+    }
+
+    private void checkRequest(TokenGrantRequestDto request) {
+        Assert.notNull(request, "request cannot be null");
+        Assert.notNull(request.grantType(), "grantType cannot be null");
+
+        switch (request.grantType()) {
+            case "password", "username":
+                Assert.notNull(request.username(), "Username cannot be null");
+                Assert.notNull(request.password(), "Password cannot be null");
+                break;
+            case "phone":
+                Assert.notNull(request.username(), "Phone number cannot be null");
+                Assert.isTrue(request.username().matches(RegexUtility.PHONE_REGEX), "Invalid phone number format");
+                Assert.notNull(request.password(), "Onetime password cannot be null");
+                Assert.notNull(request.requestId(), "Request ID cannot be null for OTP grant type");
+                break;
+            case "email":
+                Assert.notNull(request.username(), "Email cannot be null");
+                Assert.isTrue(request.username().matches(RegexUtility.EMAIL_REGEX), "Invalid email format");
+                Assert.notNull(request.password(), "Onetime password cannot be null");
+                Assert.notNull(request.requestId(), "Request ID cannot be null for OTP grant type");
+                break;
+            case "github", "microsoft", "google", "facebook":
+                Assert.notNull(request.username(), "OAuth code cannot be null");
+                break;
+            case "refresh_token":
+                Assert.notNull(request.username(), "Refresh token cannot be null");
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported grant type: " + request.grantType());
+        }
     }
 }

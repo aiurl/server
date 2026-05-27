@@ -10,6 +10,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 @Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class TokenEventSubscriber {
@@ -23,9 +25,11 @@ public class TokenEventSubscriber {
     @EventListener
     public void handleUserAuthSucceedEvent(UserAuthSuccessEvent event) {
         var command = new TokenCreateCommand() {{
-            setJti(event.getData().get("jti"));
-            setContent(event.getData().get("jwt"));
+            setJti((String) event.getData().get("jti"));
+            setContent((String) event.getData().get("jwt"));
             setSubject(event.getUserId());
+            setIssuedAt((LocalDateTime) event.getData().get("iat"));
+            setExpiresAt((LocalDateTime) event.getData().get("exp"));
         }};
 
         mediator.sendAsync(command)
