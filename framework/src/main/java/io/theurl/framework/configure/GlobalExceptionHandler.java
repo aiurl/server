@@ -83,10 +83,11 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<Map<String, String>> handleGeneralException(Throwable exception) {
-        if (exception == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+
         return switch (exception) {
+            case null -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            case CompletionException completionException -> handleGeneralException(completionException.getCause());
+            case AggregateException aggregateException -> handleGeneralException(aggregateException.getCause());
             case AccountException accountException -> handleAccountException(accountException);
             case EntityNotFoundException entityNotFoundException ->
                 handleEntityNotFoundException(entityNotFoundException);
