@@ -34,4 +34,8 @@ public class CredentialException extends RuntimeException {
     public Map<String, Object> getDetails() {
         return details;
     }
+
+    public Object get(String key) {
+        return details.getOrDefault(key, null);
+    }
 }
