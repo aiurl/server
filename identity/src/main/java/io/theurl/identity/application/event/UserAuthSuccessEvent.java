@@ -12,7 +12,7 @@ import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public final class UserAuthSuccessEvent extends ApplicationEvent implements Event {
+public class UserAuthSuccessEvent extends ApplicationEvent implements Event {
     private final String grantType;
     private final Long userId;
 

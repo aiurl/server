@@ -3,14 +3,14 @@ package io.theurl.identity.application.subscriber;
 import com.neroyun.mediator.Mediator;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.TokenCreateCommand;
-import io.theurl.identity.application.event.UserAuthSuccessEvent;
+import io.theurl.identity.application.command.TokenRevokeCommand;
+import io.theurl.identity.application.event.TokenGrantedEvent;
+import io.theurl.identity.application.event.TokenRefreshedEvent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Component
 @Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -23,15 +23,23 @@ public class TokenEventSubscriber {
 
     @Async
     @EventListener
-    public void handleUserAuthSucceedEvent(UserAuthSuccessEvent event) {
+    public void handleUserAuthSucceedEvent(TokenGrantedEvent event) {
         var command = new TokenCreateCommand() {{
-            setJti((String) event.getData().get("jti"));
-            setContent((String) event.getData().get("jwt"));
+            setJti(event.getJti());
+            setContent(event.getContent());
             setSubject(event.getUserId());
-            setIssuedAt((LocalDateTime) event.getData().get("iat"));
-            setExpiresAt((LocalDateTime) event.getData().get("exp"));
+            setExpiresAt(event.getExpiresAt());
+            setIssuedAt(event.getIssuedAt());
         }};
 
+        mediator.sendAsync(command)
+                .join();
+    }
+
+    @Async
+    @EventListener
+    public void handleTokenRefreshedEvent(TokenRefreshedEvent event) {
+        var command = new TokenRevokeCommand(event.getJti(), "refreshed");
         mediator.sendAsync(command)
                 .join();
     }

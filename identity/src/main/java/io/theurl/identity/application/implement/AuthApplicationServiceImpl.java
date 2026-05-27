@@ -8,8 +8,11 @@ import io.theurl.framework.application.BaseApplicationService;
 import io.theurl.framework.core.ObjectId;
 import io.theurl.framework.security.*;
 import io.theurl.framework.utility.Cryptography;
+import io.theurl.framework.utility.DateTimeUtility;
 import io.theurl.framework.utility.RegexUtility;
 import io.theurl.identity.application.contract.AuthApplicationService;
+import io.theurl.identity.application.event.TokenGrantedEvent;
+import io.theurl.identity.application.event.TokenRefreshedEvent;
 import io.theurl.identity.application.event.UserAuthFailureEvent;
 import io.theurl.identity.application.event.UserAuthSuccessEvent;
 import io.theurl.identity.external.ExternalAuthProvider;
@@ -31,7 +34,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.annotation.RequestScope;
 
 import java.time.LocalDateTime;
-import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -107,19 +109,24 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
             }
 
             var jwtId = ObjectId.guid().toString();
-            var iat = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-            var exp = LocalDateTime.now().plusHours(24).toEpochSecond(ZoneOffset.UTC);
-            var accessToken = generateToken(jwtId, userInfo, iat, exp);
+            var iat = LocalDateTime.now();//.toEpochSecond(ZoneOffset.UTC);
+            var exp = LocalDateTime.now().plusHours(24);//.toEpochSecond(ZoneOffset.UTC);
+            var accessToken = generateToken(jwtId, userInfo, DateTimeUtility.toDate(iat), DateTimeUtility.toDate(exp));
 
-            var event = new UserAuthSuccessEvent(request.grantType(), userInfo.getId());
-            event.setGrantTime(LocalDateTime.now());
-            event.setData("jti", jwtId);
-            event.setData("jwt", accessToken);
-            event.setData("iat", iat);
-            event.setData("exp", exp);
-            events.add(event);
+            events.add(new UserAuthSuccessEvent(request.grantType(), userInfo.getId()) {{
+                setGrantTime(iat);
+            }});
 
-            var result = new TokenGrantResponseDto(accessToken, jwtId, "Bearer", 3600 * 24, iat, userInfo.getUsername(), userInfo.getId());
+            events.add(new TokenGrantedEvent(jwtId, userInfo.getId(), accessToken) {{
+                setIssuedAt(iat);
+                setExpiresAt(exp);
+            }});
+
+            if (request.grantType().equals("refresh_token")) {
+                events.add(new TokenRefreshedEvent(request.username()));
+            }
+
+            var result = new TokenGrantResponseDto(accessToken, jwtId, "Bearer", 3600 * 24, iat.toEpochSecond(ZoneOffset.UTC), userInfo.getUsername(), userInfo.getId());
 
             return CompletableFuture.completedFuture(result);
         } catch (Exception e) {
@@ -209,14 +216,24 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
                        });
     }
 
-    private String generateToken(String id, UserAuthInfo user, long issuedAt, long expiresAt) {
+    private String generateToken(String id, UserAuthInfo user, Date issuedAt, Date expiresAt) {
         Assert.notNull(user, "user cannot be null");
         //var signingKey = environment.getProperty("JwtAuthenticationOptions.SigningKey");
         Assert.notNull(signingKey, "SigningKey cannot be null");
 
         var builder = Jwts.builder();
-        builder.subject(String.valueOf(user.getId())).id(id).issuer(issuer).issuedAt(Date.from(Instant.ofEpochSecond(issuedAt))).expiration(Date.from(Instant.ofEpochSecond(expiresAt))) // 24小时后过期
+        builder.subject(String.valueOf(user.getId())).id(id)
+               .issuer(issuer)
+               .issuedAt(issuedAt)
+               .expiration(expiresAt)
                .claim("name", user.getUsername());
+
+        if (user.getRoles() != null) {
+            for (var role : user.getRoles()) {
+                builder.claim("role", role);
+            }
+        }
+
         builder.signWith(Keys.hmacShaKeyFor(signingKey.getBytes()));
         return builder.compact();
     }
