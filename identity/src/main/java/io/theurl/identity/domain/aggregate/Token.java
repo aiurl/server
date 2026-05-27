@@ -2,6 +2,7 @@ package io.theurl.identity.domain.aggregate;
 
 import io.theurl.framework.domain.AggregateRoot;
 import io.theurl.framework.utility.SnowflakeId;
+import io.theurl.identity.domain.enums.TokenStatus;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,8 @@ public class Token extends AggregateRoot<Long> {
     private final Long subject;
     private LocalDateTime issuedAt;
     private LocalDateTime expiresAt;
+    private LocalDateTime revokedAt;
+    private TokenStatus status = TokenStatus.NORMAL;
 
     /**
      * Initializes the aggregate with the given id.
@@ -45,6 +48,14 @@ public class Token extends AggregateRoot<Long> {
         return subject;
     }
 
+    public TokenStatus getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getRevokedAt() {
+        return revokedAt;
+    }
+
     public void setIssuedAt(LocalDateTime issuedAt) {
         if (issuedAt != null && issuedAt.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("issuedAt must be in the future");
@@ -57,6 +68,11 @@ public class Token extends AggregateRoot<Long> {
             throw new IllegalArgumentException("expiresAt must be in the future");
         }
         this.expiresAt = expiresAt;
+    }
+
+    public void revoke(TokenStatus reason) {
+        this.revokedAt = LocalDateTime.now();
+        status = reason;
     }
 
     public static Token create(String jti, String content, Long subject) {

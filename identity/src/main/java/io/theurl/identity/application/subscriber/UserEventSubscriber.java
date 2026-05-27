@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope(value = BeanScope.REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 @AllArgsConstructor
-public class UserAccessFailureCountEventSubscriber {
+public class UserEventSubscriber {
 
     private final Mediator mediator;
 
