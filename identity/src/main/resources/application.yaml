@@ -36,6 +36,11 @@ spring:
             include-message: ALWAYS
             include-exception: true
             include-stacktrace: ALWAYS
+    rabbitmq:
+        host: ${RABBITMQ_HOST:localhost}
+        port: ${RABBITMQ_PORT:5672}
+        username: ${RABBITMQ_USERNAME:guest}
+        password: ${RABBITMQ_PASSWORD:guest}
 
 external-auth:
     redirect-uri: "https://theurl.io/auth/callback"

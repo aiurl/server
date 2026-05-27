@@ -3,6 +3,7 @@ package io.theurl.identity.application.contract;
 import io.theurl.framework.application.ApplicationService;
 import io.theurl.identity.application.dto.UserCreateRequestDto;
 import io.theurl.identity.application.dto.UserProfileResponseDto;
+import io.theurl.identity.application.dto.UserUpdateRequestDto;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -40,18 +41,18 @@ public interface UserApplicationService extends ApplicationService {
     /**
      * Change the email of the currently authenticated user asynchronously.
      *
-     * @param email The new email to be set for the user.
+     * @param data The user update request data containing the new email to be set for the user.
      * @return A CompletableFuture representing the asynchronous operation.
      */
-    CompletableFuture<Void> changeEmailAsync(String email);
+    CompletableFuture<Void> changeEmailAsync(UserUpdateRequestDto data);
 
     /**
      * Change the phone number of the currently authenticated user asynchronously.
      *
-     * @param phone The new phone number to be set for the user.
+     * @param data The user update request data containing the new phone number to be set for the user.
      * @return A CompletableFuture representing the asynchronous operation.
      */
-    CompletableFuture<Void> changePhoneAsync(String phone);
+    CompletableFuture<Void> changePhoneAsync(UserUpdateRequestDto data);
 
     /**
      * Change the nickname of the currently authenticated user asynchronously.
