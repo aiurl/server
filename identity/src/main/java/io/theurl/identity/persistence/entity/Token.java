@@ -31,6 +31,12 @@ public class Token implements Persistable<Long> {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
+    @Column(name = "refresh_at")
+    private LocalDateTime refreshAt;
+
+    @Column(name = "revoked_at")
+    private LocalDateTime revokedAt;
+
     @Override
     public Long getId() {
         return id;
