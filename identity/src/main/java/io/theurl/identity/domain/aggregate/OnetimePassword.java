@@ -37,7 +37,7 @@ public class OnetimePassword extends AggregateRoot<Long> {
         OnetimePassword otp = new OnetimePassword(SnowflakeId.getInstance().nextId(), requestId, recipient, code);
         otp.duration = duration;
         if (duration != null) {
-            otp.expiration = LocalDateTime.now().plusSeconds(duration);
+            otp.expiration = LocalDateTime.now().plusMinutes(duration);
         }
         otp.raiseEvent(new OnetimePasswordCreatedEvent() {{
             setRequestId(requestId);

@@ -37,7 +37,7 @@ spring:
             include-exception: true
             include-stacktrace: ALWAYS
     rabbitmq:
-        host: ${RABBITMQ_HOST:localhost}
+        host: ${RABBITMQ_HOST:127.0.0.1}
         port: ${RABBITMQ_PORT:5672}
         username: ${RABBITMQ_USERNAME:guest}
         password: ${RABBITMQ_PASSWORD:guest}

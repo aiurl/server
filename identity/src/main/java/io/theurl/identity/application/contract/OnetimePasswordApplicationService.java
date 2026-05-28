@@ -1,7 +1,6 @@
 package io.theurl.identity.application.contract;
 
 import io.theurl.framework.application.ApplicationService;
-import io.theurl.identity.application.dto.OnetimePasswordSendRequestDto;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -13,8 +12,9 @@ public interface OnetimePasswordApplicationService extends ApplicationService {
     /**
      * Send a one-time password to the specified recipient for the given usage.
      *
-     * @param request the request containing the usage and recipient information
+     * @param recipient the recipient to whom the one-time password should be sent (e.g., email address, phone number)
+     * @param usage the intended usage of the one-time password (e.g., "authentication", "password_reset")
      * @return a CompletableFuture that will complete with the sent OTP
      */
-    CompletableFuture<String> sendAsync(OnetimePasswordSendRequestDto request);
+    CompletableFuture<String> sendAsync(String recipient, String usage);
 }

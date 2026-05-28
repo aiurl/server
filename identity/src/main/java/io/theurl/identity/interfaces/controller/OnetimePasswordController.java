@@ -15,8 +15,18 @@ public class OnetimePasswordController {
         this.service = service;
     }
 
-    @PostMapping("send")
-    public CompletableFuture<String> sendOtp(@RequestBody OnetimePasswordSendRequestDto request) {
-        return service.sendAsync(request);
+    @PostMapping("authentication")
+    public CompletableFuture<String> sendAuthOtp(@RequestBody OnetimePasswordSendRequestDto request) {
+        return service.sendAsync(request.recipient(), "authentication");
+    }
+
+    @PostMapping("change-email")
+    public CompletableFuture<String> sendChangeEmailOtp(@RequestBody OnetimePasswordSendRequestDto request) {
+        return service.sendAsync(request.recipient(), "change-email");
+    }
+
+    @PostMapping("reset-password")
+    public CompletableFuture<String> sendResetPasswordOtp(@RequestBody OnetimePasswordSendRequestDto request) {
+        return service.sendAsync(request.recipient(), "reset-password");
     }
 }
