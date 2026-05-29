@@ -11,7 +11,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.authorizeHttpRequests(auth -> {
-                auth.requestMatchers("/api/**").authenticated();
+                //auth.requestMatchers("/api/**").authenticated();
                 auth.anyRequest().permitAll();
             })
             .csrf(AbstractHttpConfigurer::disable)
