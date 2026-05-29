@@ -20,7 +20,7 @@ WORKDIR /app
 
 ENV JAVA_OPTS="-Xms512m -Xmx1024m"
 ENV SPRING_PROFILES_ACTIVE=native
-ENV CONFIG_SEARCH_LOCATIONS=file:./config/
+ENV CONFIG_SEARCH_LOCATIONS=file:/config-repo}
 
 COPY --from=build /workspace/config/target/config-1.0.jar /app/app.jar
 
