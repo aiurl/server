@@ -8,5 +8,4 @@ import com.neroyun.mediator.Command;
  * The command contains the user ID and the new failure count to be set.
  */
 public record UserAccessFailureCountCommand(Long userId, String action) implements Command {
-
 }

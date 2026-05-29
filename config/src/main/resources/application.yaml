@@ -5,9 +5,13 @@ spring:
     application:
         name: config
     profiles:
-        active: native
+        active: ${SPRING_PROFILES_ACTIVE:native}
+    security:
+        user:
+            name: ${CONFIG_SERVER_USERNAME:config-user}
+            password: ${CONFIG_SERVER_PASSWORD:config-password}
     cloud:
         config:
             server:
                 native:
-                    search-locations: file:./config-repo/
+                    search-locations: ${CONFIG_SEARCH_LOCATIONS:file:./config}

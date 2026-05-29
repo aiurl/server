@@ -12,6 +12,6 @@ public class TokenDetail {
     private Long subject;
     private LocalDateTime issuedAt;
     private LocalDateTime expiresAt;
-    private LocalDateTime refreshAt;
     private LocalDateTime revokedAt;
+    private String status;
 }

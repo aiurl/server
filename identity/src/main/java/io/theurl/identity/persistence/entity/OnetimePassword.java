@@ -34,8 +34,8 @@ public class OnetimePassword implements Persistable<Long> {
     @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "usage")
-    private int usage;
+    @Column(name = "usage", length = 20)
+    private String usage;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

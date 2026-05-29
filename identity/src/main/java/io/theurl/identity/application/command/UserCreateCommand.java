@@ -4,7 +4,7 @@ import com.neroyun.mediator.Command;
 import lombok.Data;
 
 @Data
-public class UserCreateCommand implements Command {
+public final class UserCreateCommand implements Command {
     private String username;
     private String password;
     private String nickname;

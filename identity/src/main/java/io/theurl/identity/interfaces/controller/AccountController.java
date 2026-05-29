@@ -46,7 +46,7 @@ public class AccountController {
     @PutMapping("/email")
     @Operation(summary = "Change user email", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Void> changeEmail(@RequestBody UserUpdateRequestDto data) {
-        service.changeEmailAsync(data.getEmail())
+        service.changeEmailAsync(data)
                .join();
         return ResponseEntity.ok().build();
     }
@@ -54,7 +54,7 @@ public class AccountController {
     @PutMapping("/phone")
     @Operation(summary = "Change user phone", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Void> changePhone(@RequestBody UserUpdateRequestDto data) {
-        service.changePhoneAsync(data.getPhone())
+        service.changePhoneAsync(data)
                .join();
         return ResponseEntity.ok().build();
     }

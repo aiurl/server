@@ -7,4 +7,6 @@ public class UserUpdateRequestDto {
     private String email;
     private String phone;
     private String nickname;
+    private String code;
+    private String requestId;
 }

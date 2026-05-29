@@ -71,6 +71,8 @@ build/
 ### VS Code ###
 .vscode/
 
+.air/
+
 .env
 
 application-*.properties

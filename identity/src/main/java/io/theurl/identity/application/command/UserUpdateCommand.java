@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UserUpdateCommand implements Command {
+public final class UserUpdateCommand implements Command {
     @Getter
     private final Long id;
 
@@ -16,6 +16,4 @@ public class UserUpdateCommand implements Command {
     public UserUpdateCommand(Long id) {
         this.id = id;
     }
-
-
 }

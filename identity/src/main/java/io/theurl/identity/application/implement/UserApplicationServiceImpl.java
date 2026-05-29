@@ -10,7 +10,9 @@ import io.theurl.identity.application.command.UserUpdateCommand;
 import io.theurl.identity.application.contract.UserApplicationService;
 import io.theurl.identity.application.dto.UserCreateRequestDto;
 import io.theurl.identity.application.dto.UserProfileResponseDto;
+import io.theurl.identity.application.dto.UserUpdateRequestDto;
 import io.theurl.identity.external.ExternalAuthProvider;
+import io.theurl.identity.persistence.query.OnetimePasswordDetailQuery;
 import io.theurl.identity.persistence.query.UserAuthInfoQuery;
 import io.theurl.identity.persistence.query.UserDetailQuery;
 import org.modelmapper.ModelMapper;
@@ -18,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
 
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
@@ -68,16 +71,21 @@ public class UserApplicationServiceImpl extends BaseApplicationService implement
     }
 
     @Override
-    public CompletableFuture<Void> changeEmailAsync(String email) {
+    public CompletableFuture<Void> changeEmailAsync(UserUpdateRequestDto data) {
+        checkCodeAsync(data.getRequestId(), data.getPhone(), data.getCode())
+            .join();
         var command = new UserUpdateCommand(currentUserId());
-        command.getModifications().put("email", email);
+        command.getModifications().put("email", data.getEmail());
         return mediator.sendAsync(command);
     }
 
     @Override
-    public CompletableFuture<Void> changePhoneAsync(String phone) {
+    public CompletableFuture<Void> changePhoneAsync(UserUpdateRequestDto data) {
+        checkCodeAsync(data.getRequestId(), data.getPhone(), data.getCode())
+            .join();
+
         var command = new UserUpdateCommand(currentUserId());
-        command.getModifications().put("phone", phone);
+        command.getModifications().put("phone", data.getPhone());
         return mediator.sendAsync(command);
     }
 
@@ -104,5 +112,25 @@ public class UserApplicationServiceImpl extends BaseApplicationService implement
     @Override
     public CompletableFuture<Void> removeAuthorityAsync(String provider, String openId) {
         return null;
+    }
+
+    CompletableFuture<Void> checkCodeAsync(String requestId, String recipient, String code) {
+        return mediator.executeAsync(new OnetimePasswordDetailQuery(requestId)).thenAccept(otp -> {
+            if (otp == null) {
+                throw new CredentialIncorrectException("Invalid verify code.");
+            }
+            if (otp.getExpiration().isBefore(LocalDateTime.now())) {
+                throw new CredentialIncorrectException("Verify code has expired.");
+            }
+            if (otp.getChecked() != null) {
+                throw new CredentialIncorrectException("Verify code has already been used.");
+            }
+            if (!otp.getRecipient().equals(recipient)) {
+                throw new CredentialIncorrectException("Invalid verify code recipient.");
+            }
+            if (otp.getCode() == null || !otp.getCode().equals(code)) {
+                throw new CredentialIncorrectException("Invalid verify code.");
+            }
+        });
     }
 }

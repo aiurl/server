@@ -1,5 +1,7 @@
 package io.theurl.framework.domain;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +13,8 @@ public class AggregateRoot<ID extends Comparable<ID>> extends Entity<ID> impleme
     private final List<IDomainEvent> events;
 
     private final Map<Class<? extends IDomainEvent>, Consumer<IDomainEvent>> eventHandlers = new HashMap<>();
+
+    protected final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
     /**
      * Initializes the aggregate with the given id.
@@ -25,6 +29,10 @@ public class AggregateRoot<ID extends Comparable<ID>> extends Entity<ID> impleme
     @Override
     public List<IDomainEvent> getEvents() {
         return List.copyOf(events);
+    }
+
+    public boolean hasEvents() {
+        return events != null && !events.isEmpty();
     }
 
     @Override
@@ -55,5 +63,23 @@ public class AggregateRoot<ID extends Comparable<ID>> extends Entity<ID> impleme
         for (var event : events) {
             event.attach(this);
         }
+    }
+
+    /**
+     * Adds a property change listener to the aggregate root.
+     *
+     * @param listener the listener to be added
+     */
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        support.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * Removes a property change listener from the aggregate root.
+     *
+     * @param listener the listener to be removed
+     */
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        support.removePropertyChangeListener(listener);
     }
 }

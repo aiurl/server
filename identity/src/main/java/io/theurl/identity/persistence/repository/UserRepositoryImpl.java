@@ -70,10 +70,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User findByAnyOf(String username, String email, String phone) {
         return repository.findByAnyOf(username, email, phone)
-                         .map(entity ->{
-                             System.out.println(entity);
-                             return mapper.map(entity, User.class);
-                         })
+                         .map(entity -> mapper.map(entity, User.class))
                          .orElse(null);
     }
 }
