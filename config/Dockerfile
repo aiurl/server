@@ -18,9 +18,11 @@ RUN mvn -f config/pom.xml clean package spring-boot:repackage -DskipTests -Dspri
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
+RUN mkdir -p /app/config
+
 ENV JAVA_OPTS="-Xms512m -Xmx1024m"
 ENV SPRING_PROFILES_ACTIVE=native
-ENV CONFIG_SEARCH_LOCATIONS=file:/config-repo}
+ENV CONFIG_SEARCH_LOCATIONS=file:./config
 
 COPY --from=build /workspace/config/target/config-1.0.jar /app/app.jar
 
