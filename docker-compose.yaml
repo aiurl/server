@@ -1,0 +1,142 @@
+version: "1.0"
+
+services:
+    theurl-config-server:
+        build: -t theurl/config-server -f /config/Dockerfile .
+        ports:
+            - "8900"
+        environment:
+            - SPRING_PROFILES_ACTIVE=navive
+            - CONFIG_SERVER_USERNAME=theurl
+            - CONFIG_SERVER_PASSWORD=Qwer.1234
+            - CONFIG_SEARCH_LOCATIONS=file:./config
+        volumes:
+            - theurl-config-data:/app/config
+
+    theurl-identity-service:
+        build: -t theurl/identity-service -f /identity/Dockerfile .
+        ports:
+            - "8901:8901"
+        environment:
+            - CONFIG_SERVER_URI=http://theurl-config-server:8900
+            - CONFIG_SERVER_USERNAME=theurl
+            - CONFIG_SERVER_PASSWORD=Qwer.1234
+            - DB_URL=jdbc:postgresql://theurl-db:5432/linkyou?currentSchema=public
+            - DB_USERNAME=postgres
+            - DB_PASSWORD=postgres
+            - DB_DRIVER=org.postgresql.Driver
+            - DB_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+            - REDIS_URL=redis://theurl-redis:6379
+            - MONGO_URI=mongodb://theurl-mongo:27017/linkyou
+            - RABBITMQ_HOST=theurl-rabbitmq
+            - RABBITMQ_PORT=5672
+            - RABBITMQ_USERNAME=guest
+            - RABBITMQ_PASSWORD=guest
+            - JWT_SECRET=GImXbOaM2RNkzHhJ7/q3NpYMa1j/xqlahPg9KwX99qI=
+            - EXTERNAL_AUTH_REDIRECTURI=https://theurl.io/auth/callback
+            - GOOGLE_CLIENT_ID=your-google-client-id
+            - GOOGLE_CLIENT_SECRET=your-google-client-secret
+            - GITHUB_CLIENT_ID=your-github-client-id
+            - GITHUB_CLIENT_SECRET=your-github-client-secret
+            - FACEBOOK_CLIENT_ID=your-facebook-client-id
+            - FACEBOOK_CLIENT_SECRET=your-facebook-client-secret
+            - MICROSOFT_CLIENT_ID=your-microsoft-client-id
+            - MICROSOFT_CLIENT_SECRET=your-microsoft-client-secret
+        depends_on:
+            - theurl-db
+            - theurl-redis
+            - theurl-rabbitmq
+
+    theurl-message-service:
+        build: -t theurl/message-service -f /message/Dockerfile .
+        ports:
+            - "8902:8902"
+        environment:
+            - CONFIG_SERVER_URI=http://theurl-config-server:8900
+            - CONFIG_SERVER_USERNAME=theurl
+            - CONFIG_SERVER_PASSWORD=Qwer.1234
+            - DB_URL=jdbc:postgresql://theurl-db:5432/linkyou?currentSchema=public
+            - DB_USERNAME=postgres
+            - DB_PASSWORD=postgres
+            - DB_DRIVER=org.postgresql.Driver
+            - DB_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+            - REDIS_URL=redis://theurl-redis:6379
+            - MONGO_URI=mongodb://theurl-mongo:27017/linkyou
+            - RABBITMQ_HOST=theurl-rabbitmq
+            - RABBITMQ_PORT=5672
+            - RABBITMQ_USERNAME=guest
+            - RABBITMQ_PASSWORD=guest
+        depends_on:
+            - theurl-db
+            - theurl-redis
+            - theurl-rabbitmq
+
+    theurl-bundle-service:
+        build: -t theurl/bundle-service -f /bundle/Dockerfile .
+        ports:
+            - "8903:8903"
+        environment:
+            - CONFIG_SERVER_URI=http://theurl-config-server:8900
+            - CONFIG_SERVER_USERNAME=theurl
+            - CONFIG_SERVER_PASSWORD=Qwer.1234
+            - DB_URL=jdbc:postgresql://theurl-db:5432/linkyou?currentSchema=public
+            - DB_USERNAME=postgres
+            - DB_PASSWORD=postgres
+            - DB_DRIVER=org.postgresql.Driver
+            - DB_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+            - REDIS_URL=redis://theurl-redis:6379
+            - MONGO_URI=mongodb://theurl-mongo:27017/linkyou
+            - RABBITMQ_HOST=theurl-rabbitmq
+            - RABBITMQ_PORT=5672
+            - RABBITMQ_USERNAME=guest
+            - RABBITMQ_PASSWORD=guest
+        depends_on:
+            - theurl-db
+            - theurl-redis
+            - theurl-rabbitmq
+
+    theurl-db:
+        image: postgres:latest
+        environment:
+            - POSTGRES_DB=linkyou
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        ports:
+            - "5432"
+
+    theurl-redis:
+        image: redis:latest
+        ports:
+            - "6379"
+
+    theurl-mongo:
+        image: mongo:latest
+        ports:
+            - "27017"
+
+    theurl-rabbitmq:
+        image: rabbitmq:management
+        ports:
+            - "15671"
+            - "15672"
+            - "15691"
+            - "15692"
+            - "25672"
+            - "4369"
+            - "5671"
+            - "5672"
+
+networks:
+    theurl-network:
+        driver: bridge
+
+volumes:
+    theurl-db-data:
+    theurl-redis-data:
+    theurl-mongo-data:
+    theurl-config-data:
+        driver: local
+        driver_opts:
+            type: none
+            device: ./theurl/config
+            o: bind
