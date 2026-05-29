@@ -73,6 +73,8 @@ build/
 
 .air/
 
+.config-repo/
+
 .env
 
 application-*.properties
