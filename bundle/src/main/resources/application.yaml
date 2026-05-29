@@ -1,3 +1,72 @@
+server:
+  port: 8903
+
 spring:
+    profiles:
+        active: ${SPRING_PROFILES_ACTIVE:dev}
     application:
-        name: bundle
+        name: identity
+    config:
+        import: optional:file:.env[.properties]
+    cloud:
+        config:
+            enabled: false
+            uri: ${CONFIG_SERVER_URI:http://localhost:8900}
+    datasource:
+        url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou?currentSchema=public}
+        username: ${DB_USERNAME:postgres}
+        password: ${DB_PASSWORD:postgres}
+        driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+    jpa:
+        hibernate:
+            ddl-auto: update
+            dialect: ${DB_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+        show-sql: true
+        properties:
+            hibernate:
+                multiTenancy: SCHEMA
+                format_sql: true
+    data:
+        redis:
+            url: ${REDIS_URL:redis://localhost:6379}
+        mongodb:
+            uri: ${MONGO_URI:mongodb://localhost:27017/linkyou}
+    web:
+        error:
+            include-message: ALWAYS
+            include-exception: true
+            include-stacktrace: ALWAYS
+    rabbitmq:
+        host: ${RABBITMQ_HOST:127.0.0.1}
+        port: ${RABBITMQ_PORT:5672}
+        username: ${RABBITMQ_USERNAME:guest}
+        password: ${RABBITMQ_PASSWORD:guest}
+
+external-auth:
+    redirect-uri: "https://theurl.io/auth/callback"
+    google:
+        client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
+        client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
+    github:
+        client-id: ${GITHUB_CLIENT_ID:your-github-client-id}
+        client-secret: ${GITHUB_CLIENT_SECRET:your-github-client-secret}
+    facebook:
+        client-id: ${FACEBOOK_CLIENT_ID:your-facebook-client-id}
+        client-secret: ${FACEBOOK_CLIENT_SECRET:your-facebook-client-secret}
+    microsoft:
+        client-id: ${MICROSOFT_CLIENT_ID:your-microsoft-client-id}
+        client-secret: ${MICROSOFT_CLIENT_SECRET:your-microsoft-client-secret}
+
+jwt:
+    secret: ${JWT_SECRET:your-jwt-secret}
+    issuer: theurl.io
+    expiration: 3600 # in seconds
+
+logging:
+    file:
+        name: #{level}-{T(java.time.LocalDate).now()}.log
+        path: logs
+    level:
+        io.theurl.identity: debug
+        org.springframework: debug
+        root: info
