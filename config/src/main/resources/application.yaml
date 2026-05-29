@@ -5,9 +5,9 @@ spring:
     application:
         name: config
     profiles:
-        active: native
+        active: ${SPRING_PROFILES_ACTIVE:native}
     cloud:
         config:
             server:
                 native:
-                    search-locations: file:./config-repo/
+                    search-locations: ${CONFIG_SEARCH_LOCATIONS:file:./config/}
