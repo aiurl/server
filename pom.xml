@@ -17,6 +17,7 @@
     <description>theurl root pom</description>
     <url>https://theurl.io</url>
     <modules>
+        <module>bundle</module>
         <module>config</module>
         <module>framework</module>
         <module>identity</module>
