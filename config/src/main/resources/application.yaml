@@ -11,7 +11,7 @@ spring:
             name: ${CONFIG_SERVER_USERNAME:config-user}
             password: ${CONFIG_SERVER_PASSWORD:config-password}
     mongodb:
-        uri: ${MONGO_URI:mongodb://localhost:27017/linkyou?authSource=admin}
+        uri: ${MONGO_URI:mongodb://host.docker.internal:27017/linkyou?authSource=admin}
     data:
         redis:
             url: ${REDIS_URL:redis://localhost:6379}
