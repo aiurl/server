@@ -18,7 +18,7 @@ spring:
         url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou?currentSchema=public}
         username: ${DB_USERNAME:postgres}
         password: ${DB_PASSWORD:postgres}
-        driver-class-name: ${DB_DRIVER:"org.postgresql.Driver"}
+        driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
     jpa:
         hibernate:
             ddl-auto: update
@@ -31,8 +31,6 @@ spring:
     data:
         redis:
             url: ${REDIS_URL:redis://localhost:6379}
-        mongodb:
-            uri: ${MONGO_URI:mongodb://localhost:27017/linkyou}
     web:
         error:
             include-message: ALWAYS
