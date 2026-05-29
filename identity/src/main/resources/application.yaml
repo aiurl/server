@@ -7,13 +7,7 @@ spring:
     application:
         name: identity
     config:
-        import: optional:file:.env[.properties]
-    cloud:
-        config:
-            enabled: true
-            uri: ${CONFIG_SERVER_URI:http://localhost:8900}
-            password: ${CONFIG_SERVER_PASSWORD:Qwer.1234}
-            username: ${CONFIG_SERVER_USERNAME:theurl}
+        import: optional:configserver:${CONFIG_SERVER_URI:http://localhost:8900/env}
     datasource:
         url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou?currentSchema=public}
         username: ${DB_USERNAME:postgres}

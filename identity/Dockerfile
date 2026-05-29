@@ -22,10 +22,8 @@ WORKDIR /app
 
 ENV JAVA_OPTS="-Xms512m -Xmx1024m"
 ENV SPRING_PROFILES_ACTIVE=prod
-ENV CONFIG_SERVER_URI=http://theurl-config-server:8900
-ENV CONFIG_SERVER_USERNAME=theurl
-ENV CONFIG_SERVER_PASSWORD=Qwer.1234
-ENV DB_URL=jdbc:postgresql://theurl-db:5432/linkyou?currentSchema=public
+ENV CONFIG_SERVER_URI=http://theurl-config-server:8900/env
+ENV DB_URL="jdbc:postgresql://theurl-db:5432/linkyou?currentSchema=public"
 ENV DB_USERNAME=postgres
 ENV DB_PASSWORD=postgres
 ENV DB_DRIVER=org.postgresql.Driver

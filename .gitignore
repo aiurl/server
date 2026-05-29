@@ -74,9 +74,12 @@ build/
 .air/
 
 .config-repo/
+.config/
+.properties/
 
 .env
 
 application-*.properties
 application-*.yml
 application-*.yaml
+docker-compose.dev.yaml
