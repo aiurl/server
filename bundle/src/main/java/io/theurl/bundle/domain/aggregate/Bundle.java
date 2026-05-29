@@ -128,4 +128,8 @@ public class Bundle extends AggregateRoot<Long> {
     public BundleExtend getExtend() {
         return extend;
     }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
 }
