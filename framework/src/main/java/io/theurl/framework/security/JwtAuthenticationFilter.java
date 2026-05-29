@@ -1,4 +1,4 @@
-package io.theurl.identity.configure;
+package io.theurl.framework.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -6,8 +6,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,9 +27,10 @@ import java.util.Collections;
  * If the token is valid, it extracts the user ID from the token claims and creates an authentication object, which is then set in the SecurityContext for downstream processing.
  * If token parsing fails, it logs the error and allows the request to proceed without authentication, which will be handled by subsequent security filters.
  */
-@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Value("${jwt.secret}")
     private String signingKey;
@@ -58,7 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             } catch (Exception e) {
                 // Don't throw an exception when token parsing fails, let the subsequent authentication process handle it and return 401.
-                log.debug("JWT parse failed: {}", e.getMessage());
+                LOGGER.debug("JWT parse failed: {}", e.getMessage());
             }
         }
 
