@@ -1,0 +1,16 @@
+# VCS and editor
+.git
+.gitignore
+.idea
+.vscode
+
+# Build outputs
+**/target/
+
+# Local logs and runtime files
+logs/
+**/*.log
+
+# OS files
+.DS_Store
+
