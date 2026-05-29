@@ -10,13 +10,15 @@ spring:
         import: optional:file:.env[.properties]
     cloud:
         config:
-            enabled: false
+            enabled: true
             uri: ${CONFIG_SERVER_URI:http://localhost:8900}
+            password: ${CONFIG_SERVER_PASSWORD:Qwer.1234}
+            username: ${CONFIG_SERVER_USERNAME:theurl}
     datasource:
         url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou?currentSchema=public}
         username: ${DB_USERNAME:postgres}
         password: ${DB_PASSWORD:postgres}
-        driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+        driver-class-name: ${DB_DRIVER:"org.postgresql.Driver"}
     jpa:
         hibernate:
             ddl-auto: update
@@ -43,7 +45,7 @@ spring:
         password: ${RABBITMQ_PASSWORD:guest}
 
 external-auth:
-    redirect-uri: "https://theurl.io/auth/callback"
+    redirect-uri: ${EXTERNAL_AUTH_REDIRECTURI:https://theurl.io/auth/callback}
     google:
         client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
         client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
