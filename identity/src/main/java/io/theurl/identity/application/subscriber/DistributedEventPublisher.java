@@ -11,40 +11,21 @@ import io.theurl.shared.event.UserLockedEto;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DistributedEventBus {
-    private final Logger LOGGER = LoggerFactory.getLogger(DistributedEventBus.class);
+public class DistributedEventPublisher {
+    private final Logger LOGGER = LoggerFactory.getLogger(DistributedEventPublisher.class);
 
     private final ModelMapper mapper;
 
-    @Value("${spring.rabbitmq.host}")
-    private String host;
-    @Value("${spring.rabbitmq.port}")
-    private int port;
-    @Value("${spring.rabbitmq.username}")
-    private String username;
-    @Value("${spring.rabbitmq.password}")
-    private String password;
-
     private final ConnectionFactory factory;
 
-    public DistributedEventBus(ModelMapper mapper, Environment environment) {
-        System.out.println(host + ":" + port);
-        host = environment.getProperty("spring.rabbitmq.host");
-        username = environment.getProperty("spring.rabbitmq.username");
-        password = environment.getProperty("spring.rabbitmq.password");
+    public DistributedEventPublisher(ModelMapper mapper, ConnectionFactory factory) {
         this.mapper = mapper;
-        this.factory = new ConnectionFactory();
-        this.factory.setHost(host);
-        //this.factory.setPort(port);
-        this.factory.setUsername(username);
-        this.factory.setPassword(password);
+        this.factory = factory;
     }
 
     @Async
@@ -70,23 +51,19 @@ public class DistributedEventBus {
     @Async
     @EventListener
     public void handleUserEmailChangedEvent(UserEmailChangedEvent event) {
-        try {
-
-        } catch (Exception exception) {
-            LOGGER.error(exception.getMessage(), exception);
-        }
+        LOGGER.debug("收到用户邮箱变更事件，当前尚未接入分布式发布：{}", event.getClass().getSimpleName());
     }
 
     @Async
     @EventListener
     public void handleUserPasswordChangedEvent(UserPasswordChangedEvent event) {
-
+        LOGGER.debug("收到用户密码变更事件，当前尚未接入分布式发布：{}", event.getClass().getSimpleName());
     }
 
     @Async
     @EventListener
     public void handleUserPhoneChangedEvent(UserPhoneChangedEvent event) {
-
+        LOGGER.debug("收到用户手机号变更事件，当前尚未接入分布式发布：{}", event.getClass().getSimpleName());
     }
 
     @Async

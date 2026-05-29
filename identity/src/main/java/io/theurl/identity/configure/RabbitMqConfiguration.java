@@ -1,4 +1,4 @@
-package io.theurl.message.configure;
+package io.theurl.identity.configure;
 
 import com.rabbitmq.client.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
