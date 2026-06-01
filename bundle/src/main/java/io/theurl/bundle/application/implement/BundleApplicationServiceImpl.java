@@ -7,7 +7,10 @@ import io.theurl.bundle.application.command.BundleUpdateCommand;
 import io.theurl.bundle.application.contract.BundleApplicationService;
 import io.theurl.bundle.application.dto.BundleCreateDto;
 import io.theurl.bundle.application.dto.BundleItemEditDto;
+import io.theurl.bundle.application.dto.BundleListDto;
 import io.theurl.bundle.application.dto.BundleUpdateDto;
+import io.theurl.bundle.persistence.query.BundleCountQuery;
+import io.theurl.bundle.persistence.query.BundleListQuery;
 import io.theurl.framework.application.BaseApplicationService;
 import io.theurl.framework.utility.ShortUniqueId;
 import org.modelmapper.ModelMapper;
@@ -17,6 +20,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
@@ -134,5 +138,25 @@ public class BundleApplicationServiceImpl extends BaseApplicationService impleme
     @Override
     public CompletableFuture<Void> removeItemAsync(String vanity, long itemId) {
         return null;
+    }
+
+    @Override
+    public CompletableFuture<List<BundleListDto>> searchAsync(Map<String, Object> criteria, int from, int size) {
+        if (criteria.getOrDefault("owned", false).equals(true)) {
+            criteria.put("ownerId", currentUserId());
+        }
+        var query = new BundleListQuery(criteria, from, size);
+        return mediator.executeAsync(query)
+                       .thenApply(models -> {
+                           return models.stream()
+                                        .map(model -> mapper.map(model, BundleListDto.class))
+                                        .toList();
+                       });
+    }
+
+    @Override
+    public CompletableFuture<Integer> countAsync(Map<String, Object> criteria) {
+        var query = new BundleCountQuery(criteria);
+        return mediator.executeAsync(query);
     }
 }
