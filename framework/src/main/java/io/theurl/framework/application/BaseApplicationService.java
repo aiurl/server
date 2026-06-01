@@ -54,4 +54,12 @@ public class BaseApplicationService implements ApplicationService {
         }
         return Long.parseLong(principal.getName());
     }
+
+    protected String currentUsername() {
+        var principal = currentUser();
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new CredentialExpiredException(null, "Unauthenticated request.");
+        }
+        return principal.getName();
+    }
 }

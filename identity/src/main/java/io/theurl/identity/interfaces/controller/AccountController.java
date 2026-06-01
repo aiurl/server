@@ -24,7 +24,7 @@ public class AccountController {
     public ResponseEntity<Void> create(@RequestBody UserCreateRequestDto user) {
         service.createAsync(user)
                .join();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/profile")
@@ -40,7 +40,7 @@ public class AccountController {
     public ResponseEntity<Void> changePassword(@RequestBody UserPasswordChangeRequestDto user) {
         service.changePasswordAsync(user.getOldPassword(), user.getNewPassword())
                .join();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/email")
@@ -48,7 +48,7 @@ public class AccountController {
     public ResponseEntity<Void> changeEmail(@RequestBody UserUpdateRequestDto data) {
         service.changeEmailAsync(data)
                .join();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/phone")
@@ -56,7 +56,7 @@ public class AccountController {
     public ResponseEntity<Void> changePhone(@RequestBody UserUpdateRequestDto data) {
         service.changePhoneAsync(data)
                .join();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/nickname")
@@ -64,7 +64,7 @@ public class AccountController {
     public ResponseEntity<Void> changeNickname(@RequestBody UserUpdateRequestDto data) {
         service.changeNicknameAsync(data.getNickname())
                .join();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/authority/{provider}")
@@ -72,7 +72,7 @@ public class AccountController {
     public ResponseEntity<Void> bindAuthority(@PathVariable String provider, @RequestParam String code) {
         service.connectAuthorityAsync(provider, code)
                .join();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/authority/{provider}")
@@ -80,6 +80,6 @@ public class AccountController {
     public ResponseEntity<Void> unbindAuthority(@PathVariable String provider, @RequestParam String openId) {
         service.removeAuthorityAsync(provider, openId)
                .join();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

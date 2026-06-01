@@ -34,6 +34,10 @@ public class BundleItem implements Persistable<Long> {
     @Column(name = "order", nullable = false)
     private int order;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bundle_id", insertable = false, updatable = false)
+    private Bundle bundle;
+
     @Override
     public @Nullable Long getId() {
         return id;

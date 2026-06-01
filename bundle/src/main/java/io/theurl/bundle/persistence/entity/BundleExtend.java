@@ -1,9 +1,6 @@
 package io.theurl.bundle.persistence.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Persistable;
@@ -31,6 +28,10 @@ public class BundleExtend implements Persistable<Long> {
 
     @Column(name = "last_visited_at")
     private LocalDateTime lastVisitedAt;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id")
+    private Bundle bundle;
 
     @Override
     public @Nullable Long getId() {

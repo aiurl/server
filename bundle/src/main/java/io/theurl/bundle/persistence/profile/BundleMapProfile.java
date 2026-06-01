@@ -37,30 +37,38 @@ public class BundleMapProfile {
         mapper.createTypeMap(io.theurl.bundle.persistence.entity.Bundle.class, io.theurl.bundle.domain.aggregate.Bundle.class)
               .setProvider(provider)
               .addMappings(expression -> {
-                  expression.map(Bundle::getType, (dest, value) -> setValue(dest, "type", value));
-                  expression.map(Bundle::getVanity, (dest, value) -> setValue(dest, "vanity", value));
-                  expression.map(Bundle::getOwnerId, (dest, value) -> setValue(dest, "ownerId", value));
-                  expression.map(Bundle::getOwnerName, (dest, value) -> setValue(dest, "ownerName", value));
+//                  expression.map(Bundle::getType, (dest, value) -> setValue(dest, "type", value));
+//                  expression.map(Bundle::getVanity, (dest, value) -> setValue(dest, "vanity", value));
+//                  expression.map(Bundle::getOwnerId, (dest, value) -> setValue(dest, "ownerId", value));
+//                  expression.map(Bundle::getOwnerName, (dest, value) -> setValue(dest, "ownerName", value));
                   expression.map(Bundle::getName, io.theurl.bundle.domain.aggregate.Bundle::setName);
                   expression.map(Bundle::getDescription, io.theurl.bundle.domain.aggregate.Bundle::setDescription);
                   expression.map(Bundle::getImage, io.theurl.bundle.domain.aggregate.Bundle::setImage);
                   expression.map(Bundle::getOrder, io.theurl.bundle.domain.aggregate.Bundle::setOrder);
-                  expression.map(Bundle::getItems, (dest, value) -> {
-                      var items = dest.getItems();
-                      items.add(mapper.map(value, io.theurl.bundle.domain.aggregate.BundleItem.class));
-                  });
-                  expression.map(Bundle::getComments, (dest, value) -> {
-                      var comments = dest.getComments();
-                      comments.add(mapper.map(value, io.theurl.bundle.domain.aggregate.BundleComment.class));
-                  });
-                  expression.map(Bundle::getExtend, (dest, value) -> {
-                      var extend = (io.theurl.bundle.domain.aggregate.BundleExtend) value;
-                      dest.getExtend().setItemCount(extend.getItemCount());
-                      dest.getExtend().setCommentCount(extend.getCommentCount());
-                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
-                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
-                      dest.getExtend().setLastVisitedAt(extend.getLastVisitedAt());
-                  });
+//                  expression.map(Bundle::getItems, (dest, value) -> {
+//                      if(dest != null && value != null) {
+//                          var items = dest.getItems();
+//                          items.add(mapper.map(value, io.theurl.bundle.domain.aggregate.BundleItem.class));
+//                      }
+//                  });
+//                  expression.map(Bundle::getComments, (dest, value) -> {
+//                      if (dest == null || value == null) {
+//                          return;
+//                      }
+//                      var comments = dest.getComments();
+//                      comments.add(mapper.map(value, io.theurl.bundle.domain.aggregate.BundleComment.class));
+//                  });
+//                  expression.map(Bundle::getExtend, (dest, value) -> {
+//                      if (dest == null || value == null) {
+//                          return;
+//                      }
+//                      var extend = (io.theurl.bundle.domain.aggregate.BundleExtend) value;
+//                      dest.getExtend().setItemCount(extend.getItemCount());
+//                      dest.getExtend().setCommentCount(extend.getCommentCount());
+//                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
+//                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
+//                      dest.getExtend().setLastVisitedAt(extend.getLastVisitedAt());
+//                  });
               });
     }
 
@@ -74,7 +82,10 @@ public class BundleMapProfile {
      */
     private void setValue(io.theurl.bundle.domain.aggregate.Bundle bundle, String name, Object value) {
         try {
-            var field = bundle.getClass().getDeclaredField(name);
+            if (value == null || bundle == null) {
+                return;
+            }
+            var field = bundle.getClass().getSuperclass().getDeclaredField(name);
             field.setAccessible(true);
             field.set(bundle, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {

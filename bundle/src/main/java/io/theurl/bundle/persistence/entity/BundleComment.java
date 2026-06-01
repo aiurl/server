@@ -1,9 +1,6 @@
 package io.theurl.bundle.persistence.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Persistable;
@@ -37,6 +34,10 @@ public class BundleComment implements Persistable<Long> {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bundle_id", insertable = false, updatable = false)
+    private Bundle bundle;
 
     @Override
     public @Nullable Long getId() {

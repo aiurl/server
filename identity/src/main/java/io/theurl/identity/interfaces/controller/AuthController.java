@@ -6,6 +6,8 @@ import io.theurl.identity.application.dto.TokenGrantRequestDto;
 import io.theurl.identity.application.dto.TokenGrantResponseDto;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping("auth")
 public class AuthController {
@@ -27,8 +29,8 @@ public class AuthController {
      */
     @PostMapping("token/grant")
     @Operation(summary = "Grant access token")
-    public TokenGrantResponseDto grantToken(@RequestBody TokenGrantRequestDto request) {
-        return service.grant(request).join();
+    public CompletableFuture<TokenGrantResponseDto> grantToken(@RequestBody TokenGrantRequestDto request) {
+        return service.grant(request);
     }
 
     /**
@@ -41,9 +43,9 @@ public class AuthController {
      */
     @PostMapping("token/refresh")
     @Operation(summary = "Refresh access token")
-    public TokenGrantResponseDto refreshToken(@RequestParam String token) {
+    public CompletableFuture<TokenGrantResponseDto> refreshToken(@RequestParam String token) {
         var request = new TokenGrantRequestDto(token, null, "refresh_token", null);
-        return service.grant(request).join();
+        return service.grant(request);
     }
 
     /**
@@ -55,7 +57,7 @@ public class AuthController {
      */
     @PostMapping("token/revoke")
     @Operation(summary = "Revoke access token")
-    public void revokeToken(@RequestParam String jti) {
-        service.revoke(jti).join();
+    public CompletableFuture<Void> revokeToken(@RequestParam String jti) {
+        return service.revoke(jti);
     }
 }
