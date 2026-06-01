@@ -1,6 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.TokenRevokeCommand;
 import io.theurl.identity.domain.repository.TokenRepository;
@@ -23,7 +24,7 @@ public class TokenRevokeCommandHandler implements Handler<TokenRevokeCommand, Vo
     }
 
     @Override
-    public CompletableFuture<Void> handleAsync(TokenRevokeCommand message) {
+    public CompletableFuture<Void> handleAsync(TokenRevokeCommand message, MessageContext context) {
         try {
             var token = repository.findByJti(message.jti());
             if (token != null) {

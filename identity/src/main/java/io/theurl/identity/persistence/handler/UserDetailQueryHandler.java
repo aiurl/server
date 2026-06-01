@@ -1,6 +1,7 @@
 package io.theurl.identity.persistence.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.persistence.model.UserDetail;
 import io.theurl.identity.persistence.query.UserDetailQuery;
@@ -24,7 +25,7 @@ public class UserDetailQueryHandler implements Handler<UserDetailQuery, UserDeta
     }
 
     @Override
-    public CompletableFuture<UserDetail> handleAsync(UserDetailQuery message) {
+    public CompletableFuture<UserDetail> handleAsync(UserDetailQuery message, MessageContext context) {
         var user = repository.findById(message.id()).orElse(null);
 
         UserDetail detail;

@@ -39,6 +39,8 @@ public class BundleMapProfile {
               .addMappings(expression -> {
                   expression.map(Bundle::getType, (dest, value) -> setValue(dest, "type", value));
                   expression.map(Bundle::getVanity, (dest, value) -> setValue(dest, "vanity", value));
+                  expression.map(Bundle::getOwnerId, (dest, value) -> setValue(dest, "ownerId", value));
+                  expression.map(Bundle::getOwnerName, (dest, value) -> setValue(dest, "ownerName", value));
                   expression.map(Bundle::getName, io.theurl.bundle.domain.aggregate.Bundle::setName);
                   expression.map(Bundle::getDescription, io.theurl.bundle.domain.aggregate.Bundle::setDescription);
                   expression.map(Bundle::getImage, io.theurl.bundle.domain.aggregate.Bundle::setImage);

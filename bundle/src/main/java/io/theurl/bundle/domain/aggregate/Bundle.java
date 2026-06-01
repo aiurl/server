@@ -1,5 +1,7 @@
 package io.theurl.bundle.domain.aggregate;
 
+import io.theurl.bundle.domain.event.BundleCreatedEvent;
+import io.theurl.bundle.domain.event.BundleDeletedEvent;
 import io.theurl.framework.domain.AggregateRoot;
 import io.theurl.framework.utility.SnowflakeId;
 
@@ -32,13 +34,12 @@ public class Bundle extends AggregateRoot<Long> {
     private BundleExtend extend;
     private boolean deleted;
 
-    public static Bundle create(String type, String vanity, String name, Long ownerId, String ownerName) {
+    public static Bundle create(String type, String vanity, String name) {
         var aggregate = new Bundle(SnowflakeId.getInstance().nextId());
         aggregate.type = type;
         aggregate.vanity = vanity;
         aggregate.name = name;
-        aggregate.ownerId = ownerId;
-        aggregate.ownerName = ownerName;
+        aggregate.raiseEvent(new BundleCreatedEvent(type, vanity, name));
         return aggregate;
     }
 
@@ -90,8 +91,13 @@ public class Bundle extends AggregateRoot<Long> {
         return ownerName;
     }
 
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
+    public void setOwner(Long ownerId, String ownerName) {
+        this.ownerId = ownerId;
+        if (ownerId == null) {
+            this.ownerName = "system";
+        } else {
+            this.ownerName = ownerName;
+        }
     }
 
     public List<BundleItem> getItems() {
@@ -131,5 +137,10 @@ public class Bundle extends AggregateRoot<Long> {
 
     public boolean isDeleted() {
         return deleted;
+    }
+
+    public void delete() {
+        deleted = true;
+        raiseEvent(new BundleDeletedEvent(this.getId(), vanity, name, ownerId));
     }
 }

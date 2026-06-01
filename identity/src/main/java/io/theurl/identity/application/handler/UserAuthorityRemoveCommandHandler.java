@@ -1,6 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.UserAuthorityRemoveCommand;
 import io.theurl.identity.domain.repository.UserRepository;
@@ -23,7 +24,7 @@ public class UserAuthorityRemoveCommandHandler implements Handler<UserAuthorityR
     }
 
     @Override
-    public CompletableFuture<Void> handleAsync(UserAuthorityRemoveCommand message) {
+    public CompletableFuture<Void> handleAsync(UserAuthorityRemoveCommand message, MessageContext context) {
         try {
             var user = repository.findById(message.id());
             if (user == null) {

@@ -1,6 +1,7 @@
 package io.theurl.identity.persistence.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.persistence.model.OnetimePasswordDetail;
 import io.theurl.identity.persistence.query.OnetimePasswordDetailQuery;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,16 +19,16 @@ import java.util.concurrent.CompletableFuture;
 public class OnetimePasswordDetailQueryHandler implements Handler<OnetimePasswordDetailQuery, OnetimePasswordDetail> {
 
     @PersistenceContext
-    private EntityManager context;
+    private EntityManager manager;
 
     @Override
     @Async
-    public CompletableFuture<OnetimePasswordDetail> handleAsync(OnetimePasswordDetailQuery message) {
-        var builder = context.getCriteriaBuilder();
+    public CompletableFuture<OnetimePasswordDetail> handleAsync(OnetimePasswordDetailQuery message, MessageContext context) {
+        var builder = manager.getCriteriaBuilder();
         var criteria = builder.createQuery(OnetimePasswordDetail.class);
         var entity = criteria.from(OnetimePasswordDetail.class);
         criteria.where(builder.equal(entity.get("requestId"), message.requestId()));
-        var typedQuery = context.createQuery(criteria);
+        var typedQuery = manager.createQuery(criteria);
         return CompletableFuture.completedFuture(typedQuery.getSingleResult());
     }
 }

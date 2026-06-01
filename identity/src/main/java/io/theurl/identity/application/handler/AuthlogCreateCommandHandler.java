@@ -1,6 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.AuthlogCreateCommand;
 import io.theurl.identity.domain.repository.AuthlogRepository;
@@ -26,7 +27,7 @@ public class AuthlogCreateCommandHandler implements Handler<AuthlogCreateCommand
     }
 
     @Override
-    public CompletableFuture<Void> handleAsync(AuthlogCreateCommand message) {
+    public CompletableFuture<Void> handleAsync(AuthlogCreateCommand message, MessageContext context) {
         try {
             var authlog = Authlog.create(message.getRequestId(), message.getUsername(), message.isSuccess());
             mapper.map(message, authlog);

@@ -1,6 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.UserAccessFailureCountCommand;
 import io.theurl.identity.domain.repository.UserRepository;
@@ -22,7 +23,7 @@ public class UserAccessFailureCountCommandHandler implements Handler<UserAccessF
     }
 
     @Override
-    public CompletableFuture<Void> handleAsync(UserAccessFailureCountCommand message) {
+    public CompletableFuture<Void> handleAsync(UserAccessFailureCountCommand message, MessageContext context) {
         try {
             var user = repository.findById(message.userId());
             if (user == null) {

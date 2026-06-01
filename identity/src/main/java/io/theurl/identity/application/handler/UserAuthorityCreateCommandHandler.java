@@ -1,6 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.UserAuthorityCreateCommand;
 import io.theurl.identity.domain.repository.UserRepository;
@@ -23,7 +24,7 @@ public class UserAuthorityCreateCommandHandler implements Handler<UserAuthorityC
     }
 
     @Override
-    public CompletableFuture<Void> handleAsync(UserAuthorityCreateCommand message) {
+    public CompletableFuture<Void> handleAsync(UserAuthorityCreateCommand message, MessageContext context) {
         try {
             var user = repository.findById(message.id());
             if (user == null) {
