@@ -21,4 +21,11 @@ public class BundleCreateDto extends BundleBaseDto {
      * A unique identifier for the bundle, often used in URLs. This field is used to create a user-friendly and memorable URL for the bundle.
      */
     private String vanity;
+
+    /**
+     * Indicates whether the bundle is shared or not.
+     * If true, the bundle can be accessed by anyone with the link.
+     * If false, the bundle is private and can only be accessed by the owner.
+     */
+    private boolean shared;
 }

@@ -1,6 +1,5 @@
 package io.theurl.bundle.persistence.entity;
 
-import io.theurl.bundle.domain.aggregate.BundleExtend;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.jspecify.annotations.Nullable;
@@ -68,15 +67,12 @@ public class Bundle implements Persistable<Long> {
     private Long deletedBy;
 
     @OneToMany(mappedBy = "bundle", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "bundle_id")
     private Collection<BundleItem> items;
 
     @OneToMany(mappedBy = "bundle", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "bundle_id")
     private Collection<BundleComment> comments;
 
     @OneToOne(mappedBy = "bundle", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id")
     private BundleExtend extend;
 
     @Override
