@@ -22,6 +22,11 @@ spring:
             ddl-auto: update
             dialect: ${DB_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
         show-sql: true
+        properties:
+            hibernate:
+                globally_quoted_identifiers: true
+                multiTenancy: SCHEMA
+                format_sql: true
     data:
         redis:
             url: ${REDIS_URL:redis://localhost:6379}

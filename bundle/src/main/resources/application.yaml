@@ -24,6 +24,7 @@ spring:
         show-sql: true
         properties:
             hibernate:
+                globally_quoted_identifiers: true
                 multiTenancy: SCHEMA
                 format_sql: true
     data:
