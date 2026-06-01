@@ -34,17 +34,31 @@ public class BundleListQueryHandler implements Handler<BundleListQuery, List<Bun
     @Override
     public CompletableFuture<List<BundleListModel>> handleAsync(BundleListQuery message, MessageContext context) {
         var builder = manager.getCriteriaBuilder();
-        var criteria = builder.createQuery(Bundle.class);
-        var entity = criteria.from(Bundle.class);
+        var query = builder.createQuery(Bundle.class);
+        var select = query.from(Bundle.class);
 
-        var predicates = new ArrayList<>(List.of(builder.isFalse(entity.get("deleted"))));
+        List<Predicate> predicates = new ArrayList<>(List.of(builder.isFalse(select.get("deleted"))));
 
-        message.tryGet("type", v -> predicates.add(builder.equal(entity.get("type"), v)));
-        message.tryGet("keyword", v -> predicates.add(builder.like(entity.get("name"), "%" + v + "%")));
-        message.tryGet("ownerId", v -> predicates.add(builder.equal(entity.get("ownerId"), v)));
+        message.criteria().forEach((k, v) -> {
+            switch (k) {
+                case "ownerId" -> predicates.add(builder.equal(select.get("ownerId"), v));
+                case "type" -> predicates.add(builder.equal(select.get("type"), v));
+                case "keyword" -> {
+                    if (v instanceof String keyword) {
+                        Predicate orGroup = builder.or(
+                            builder.like(select.get("name"), "%" + keyword + "%"),
+                            builder.like(select.get("description"), "%" + keyword + "%")
+                        );
+                        predicates.add(orGroup);
+                    }
+                }
+                default -> predicates.add(builder.equal(select.get(k), v));
+            }
+        });
 
-        criteria.where(builder.and(predicates.toArray(new Predicate[0])));
-        var typedQuery = manager.createQuery(criteria);
+        query.where(builder.and(predicates.toArray(new Predicate[0])));
+
+        var typedQuery = manager.createQuery(query);
         typedQuery.setFirstResult(message.from());
         typedQuery.setMaxResults(message.size());
         var resultList = typedQuery.getResultList()

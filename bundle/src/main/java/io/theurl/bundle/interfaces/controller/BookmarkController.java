@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.theurl.bundle.application.contract.BundleApplicationService;
 import io.theurl.bundle.application.dto.BundleCreateDto;
+import io.theurl.bundle.application.dto.BundleItemListDto;
 import io.theurl.bundle.application.dto.BundleListDto;
 import io.theurl.bundle.application.dto.BundleUpdateDto;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +25,10 @@ public class BookmarkController {
     }
 
     @GetMapping("/my")
-    public CompletableFuture<List<BundleListDto>> getOwnedAsync(@RequestParam(required = false) String keyword, @RequestParam(required = false, defaultValue = "0") Integer from, @RequestParam(required = false, defaultValue = "10") Integer size) {
+    @Operation(summary = "Get owned bookmarks", security = @SecurityRequirement(name = "bearerAuth"))
+    public CompletableFuture<List<BundleListDto>> getOwnedAsync(@RequestParam(required = false) String keyword,
+                                                                @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                                @RequestParam(required = false, defaultValue = "10") Integer size) {
         var criteria = new HashMap<>(Map.<String, Object>of("owned", true, "type", "bookmark"));
         if (keyword != null) {
             criteria.put("keyword", keyword);
@@ -50,5 +54,29 @@ public class BookmarkController {
     @Operation(summary = "Delete an existing bookmark", security = @SecurityRequirement(name = "bearerAuth"))
     public CompletableFuture<Void> deleteAsync(@PathVariable String vanity) {
         return service.deleteAsync(vanity);
+    }
+
+    @GetMapping("{vanity}/items/list")
+    @Operation(summary = "Get items of a bookmark", security = @SecurityRequirement(name = "bearerAuth"))
+    public CompletableFuture<List<BundleItemListDto>> searchItemsAsync(@PathVariable String vanity,
+                                                                       @RequestParam(required = false) String keyword,
+                                                                       @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                                       @RequestParam(required = false, defaultValue = "10") Integer size) {
+        var criteria = new HashMap<String, Object>();
+        if (keyword != null) {
+            criteria.put("keyword", keyword);
+        }
+        return service.searchItemsAsync(vanity, criteria, from, size);
+    }
+
+    @GetMapping("{vanity}/items/count")
+    @Operation(summary = "Get count of items in a bookmark", security = @SecurityRequirement(name = "bearerAuth"))
+    public CompletableFuture<Integer> countItemsAsync(@PathVariable String vanity,
+                                                      @RequestParam(required = false) String keyword) {
+        var criteria = new HashMap<String, Object>();
+        if (keyword != null) {
+            criteria.put("keyword", keyword);
+        }
+        return service.countItemsAsync(vanity, criteria);
     }
 }

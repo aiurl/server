@@ -5,7 +5,6 @@ import com.neroyun.mediator.MessageContext;
 import io.theurl.bundle.persistence.entity.Bundle;
 import io.theurl.bundle.persistence.query.BundleCountQuery;
 import io.theurl.framework.core.BeanScope;
-import io.theurl.framework.utility.MapUtility;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.Predicate;
@@ -28,17 +27,30 @@ public class BundleCountQueryHandler implements Handler<BundleCountQuery, Intege
     @Override
     public CompletableFuture<Integer> handleAsync(BundleCountQuery message, MessageContext context) {
         var builder = manager.getCriteriaBuilder();
-        var criteria = builder.createQuery(Long.class);
-        Root<Bundle> entity = criteria.from(Bundle.class);
-        criteria.select(builder.count(entity));
-        var predicates = new ArrayList<>(List.of(builder.isFalse(entity.get("deleted"))));
+        var query = builder.createQuery(Long.class);
+        Root<Bundle> select = query.from(Bundle.class);
+        query.select(builder.count(select));
+        List<Predicate> predicates = new ArrayList<>(List.of(builder.isFalse(select.get("deleted"))));
 
-        MapUtility.tryGet(message.criteria(), "type", v -> predicates.add(builder.equal(entity.get("type"), v)));
-        MapUtility.tryGet(message.criteria(), "keyword", v -> predicates.add(builder.like(entity.get("name"), "%" + v + "%")));
-        MapUtility.tryGet(message.criteria(), "ownerId", v -> predicates.add(builder.equal(entity.get("ownerId"), v)));
+        message.criteria().forEach((key, value) -> {
+            switch (key) {
+                case "ownerId" -> predicates.add(builder.equal(select.get("ownerId"), value));
+                case "type" -> predicates.add(builder.equal(select.get("type"), value));
+                case "keyword" -> {
+                    if (value instanceof String keyword) {
+                        Predicate orGroup = builder.or(
+                            builder.like(select.get("name"), "%" + keyword + "%"),
+                            builder.like(select.get("description"), "%" + keyword + "%")
+                        );
+                        predicates.add(orGroup);
+                    }
+                }
+                default -> predicates.add(builder.equal(select.get(key), value));
+            }
+        });
 
-        criteria.where(builder.and(predicates.toArray(new Predicate[0])));
-        var typedQuery = manager.createQuery(criteria);
+        query.where(builder.and(predicates.toArray(new Predicate[0])));
+        var typedQuery = manager.createQuery(query);
         var result = typedQuery.getSingleResult();
         return CompletableFuture.completedFuture(result.intValue());
     }
