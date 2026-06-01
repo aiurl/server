@@ -1,9 +1,6 @@
 package io.theurl.identity.persistence.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.domain.Persistable;
 
@@ -11,7 +8,9 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "onetime_password")
+@Table(name = "onetime_password", indexes = {
+    @Index(name = "idx_onetime_password_request_id", columnList = "request_id", unique = true)
+})
 public class OnetimePassword implements Persistable<Long> {
     @Id
     private Long id;

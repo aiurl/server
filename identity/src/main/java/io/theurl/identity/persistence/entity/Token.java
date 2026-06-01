@@ -1,9 +1,6 @@
 package io.theurl.identity.persistence.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.domain.Persistable;
 
@@ -11,7 +8,10 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "token")
+@Table(name = "token", indexes = {
+    @Index(name = "idx_token_jti", columnList = "jti", unique = true),
+    @Index(name = "idx_token_subject", columnList = "subject")
+})
 public class Token implements Persistable<Long> {
     @Id
     private Long id;

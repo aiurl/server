@@ -9,10 +9,10 @@ import java.util.Collection;
 
 @Data
 @Entity
-@Table(name = "users", indexes = {
-    @Index(name = "user_idx_username", columnList = "username", unique = true),
-    @Index(name = "user_idx_email", columnList = "email", unique = true),
-    @Index(name = "user_idx_phone", columnList = "phone", unique = true)
+@Table(name = "user", indexes = {
+    @Index(name = "idx_user_idx_username", columnList = "username", unique = true),
+    @Index(name = "idx_user_idx_email", columnList = "email", unique = true),
+    @Index(name = "idx_user_idx_phone", columnList = "phone", unique = true)
 })
 public class User implements Persistable<Long> {
     static final int USERNAME_LENGTH = 64;
