@@ -1,6 +1,7 @@
 package io.theurl.identity.persistence.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.persistence.entity.User;
 import io.theurl.identity.persistence.entity.UserRole;
@@ -15,7 +16,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +27,7 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 public class UserAuthInfoQueryHandler implements Handler<UserAuthInfoQuery, UserAuthInfo> {
 
     @PersistenceContext
-    private EntityManager context;
+    private EntityManager manager;
 
     /**
      * Handles the given query and returns the corresponding UserAuthInfo.
@@ -37,11 +37,11 @@ public class UserAuthInfoQueryHandler implements Handler<UserAuthInfoQuery, User
      */
     @Override
     @Async
-    public CompletableFuture<UserAuthInfo> handleAsync(UserAuthInfoQuery query) {
+    public CompletableFuture<UserAuthInfo> handleAsync(UserAuthInfoQuery query, MessageContext context) {
         return supplyAsync(() -> {
             String sql = getSql(query);
 
-            var typedQuery = context.createQuery(sql, User.class);
+            var typedQuery = manager.createQuery(sql, User.class);
 
             switch (query.provider()) {
                 case "id" -> typedQuery.setParameter("id", Long.parseLong(query.name()));
@@ -66,7 +66,7 @@ public class UserAuthInfoQueryHandler implements Handler<UserAuthInfoQuery, User
                 return null;
             }
 
-            List<UserRole> roles = context.createQuery("SELECT u from UserRole u where u.userId = :userId", UserRole.class).setParameter("userId", user.getId()).getResultList();
+            List<UserRole> roles = manager.createQuery("SELECT u from UserRole u where u.userId = :userId", UserRole.class).setParameter("userId", user.getId()).getResultList();
 
             return new UserAuthInfo() {{
                 setId(user.getId());

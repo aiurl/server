@@ -1,6 +1,7 @@
 package io.theurl.bundle.persistence.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.bundle.persistence.model.BundleDetailModel;
 import io.theurl.bundle.persistence.query.BundleDetailQuery;
 import io.theurl.bundle.persistence.repository.JpaBundleRepository;
@@ -25,13 +26,13 @@ public class BundleDetailQueryHandler implements Handler<BundleDetailQuery, Bund
     }
 
     @Override
-    public CompletableFuture<BundleDetailModel> handleAsync(BundleDetailQuery message) {
+    public CompletableFuture<BundleDetailModel> handleAsync(BundleDetailQuery message, MessageContext context) {
         var entity = repository.findByVanity(message.vanity())
                                .orElse(null);
         if (entity == null || entity.isDeleted()) {
             throw new EntityNotFoundException("Bundle not found with vanity: " + message.vanity());
         }
-        
+
         var detail = mapper.map(entity, BundleDetailModel.class);
         return CompletableFuture.completedFuture(detail);
     }

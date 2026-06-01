@@ -3,6 +3,7 @@ package io.theurl.identity.application.handler;
 import com.neroyun.mediator.Event;
 import com.neroyun.mediator.Handler;
 import com.neroyun.mediator.Mediator;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.OnetimePasswordCreateCommand;
 import io.theurl.identity.domain.aggregate.OnetimePassword;
@@ -24,7 +25,7 @@ public class OnetimePasswordCreateCommandHandler implements Handler<OnetimePassw
     }
 
     @Override
-    public CompletableFuture<Void> handleAsync(OnetimePasswordCreateCommand message) {
+    public CompletableFuture<Void> handleAsync(OnetimePasswordCreateCommand message, MessageContext context) {
         var aggregate = OnetimePassword.create(message.getRequestId(), message.getRecipient(), message.getCode(), message.getDuration());
         aggregate.setUsage(message.getUsage());
         repository.save(aggregate);

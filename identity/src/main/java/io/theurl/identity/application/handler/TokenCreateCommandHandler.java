@@ -1,6 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.TokenCreateCommand;
 import io.theurl.identity.domain.aggregate.Token;
@@ -25,10 +26,8 @@ public class TokenCreateCommandHandler implements Handler<TokenCreateCommand, Vo
     }
 
     @Override
-    public CompletableFuture<Void> handleAsync(TokenCreateCommand message) {
+    public CompletableFuture<Void> handleAsync(TokenCreateCommand message, MessageContext context) {
         try {
-
-
             var token = Token.create(message.getJti(), message.getContent(), message.getSubject());
             token.setExpiresAt(message.getExpiresAt());
             token.setIssuedAt(message.getIssuedAt());

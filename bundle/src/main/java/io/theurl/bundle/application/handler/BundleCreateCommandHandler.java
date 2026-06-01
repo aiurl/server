@@ -2,6 +2,7 @@ package io.theurl.bundle.application.handler;
 
 import com.neroyun.mediator.Handler;
 import com.neroyun.mediator.Mediator;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.bundle.application.command.BundleCreateCommand;
 import io.theurl.bundle.domain.aggregate.Bundle;
 import io.theurl.bundle.domain.repository.BundleRepository;
@@ -27,7 +28,7 @@ public class BundleCreateCommandHandler implements Handler<BundleCreateCommand, 
     }
 
     @Override
-    public CompletableFuture<Void> handleAsync(BundleCreateCommand message) {
+    public CompletableFuture<Void> handleAsync(BundleCreateCommand message, MessageContext context) {
         var userId = Long.getLong(Objects.requireNonNull(getRequest()).getUserPrincipal().getName());
         var aggregate = Bundle.create(message.getType(), message.getVanity(), message.getName());
         if (message.getDescription() != null) {

@@ -1,6 +1,7 @@
 package io.theurl.identity.persistence.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.persistence.model.TokenDetail;
 import io.theurl.identity.persistence.query.TokenDetailQuery;
@@ -24,7 +25,7 @@ public class TokenDetailQueryHandler implements Handler<TokenDetailQuery, TokenD
     }
 
     @Override
-    public CompletableFuture<TokenDetail> handleAsync(TokenDetailQuery message) {
+    public CompletableFuture<TokenDetail> handleAsync(TokenDetailQuery message, MessageContext context) {
         var entity = repository.findByJti(message.jti())
                                .orElse(null);
 

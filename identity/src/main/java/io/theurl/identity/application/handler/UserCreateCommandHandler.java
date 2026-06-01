@@ -1,6 +1,7 @@
 package io.theurl.identity.application.handler;
 
 import com.neroyun.mediator.Handler;
+import com.neroyun.mediator.MessageContext;
 import io.theurl.framework.core.BeanScope;
 import io.theurl.identity.application.command.UserCreateCommand;
 import io.theurl.identity.domain.aggregate.User;
@@ -27,7 +28,7 @@ public class UserCreateCommandHandler implements Handler<UserCreateCommand, Void
     @Async
     @Transactional
     @Override
-    public CompletableFuture<Void> handleAsync(UserCreateCommand message) {
+    public CompletableFuture<Void> handleAsync(UserCreateCommand message, MessageContext context) {
         try {
             var exists = repository.findByAnyOf(message.getUsername(), message.getEmail(), message.getPhone());
 
