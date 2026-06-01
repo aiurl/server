@@ -12,6 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Bookmark aggregate HTTP endpoints.
+ *
+ * <p>All APIs delegate business logic to {@link BundleApplicationService};
+ * the controller only handles request mapping, lightweight parameter shaping,
+ * and response header composition.</p>
+ */
 @RestController
 @RequestMapping("/api/bookmark")
 public class BookmarkController {
@@ -26,6 +33,7 @@ public class BookmarkController {
     public CompletableFuture<List<BundleListDto>> getOwnedAsync(@RequestParam(required = false) String keyword,
                                                                 @RequestParam(required = false, defaultValue = "0") Integer from,
                                                                 @RequestParam(required = false, defaultValue = "10") Integer size) {
+        // Force owned+bookmark filters; optional keyword is merged only when provided.
         var criteria = new HashMap<>(Map.<String, Object>of("owned", true, "type", "bookmark"));
         if (keyword != null) {
             criteria.put("keyword", keyword);
@@ -38,6 +46,7 @@ public class BookmarkController {
     public CompletableFuture<List<BundleListDto>> searchAsync(@RequestParam(required = false) String keyword,
                                                               @RequestParam(required = false, defaultValue = "0") Integer from,
                                                               @RequestParam(required = false, defaultValue = "10") Integer size) {
+        // Shared search endpoint constrained to bookmark type.
         var criteria = new HashMap<String, Object>();
         if (keyword != null) {
             criteria.put("keyword", keyword);
@@ -49,8 +58,10 @@ public class BookmarkController {
     @PostMapping
     @Operation(summary = "Create a new bookmark", security = @SecurityRequirement(name = "bearerAuth"))
     public CompletableFuture<Void> createAsync(@RequestBody BundleCreateDto data, HttpServletResponse response) {
+        // Enforce server-side resource type to avoid client-side tampering.
         data.setType("bookmark");
         return service.createAsync(data)
+                      // Return created vanity identifier through response header for client navigation.
                       .thenAccept(result -> response.addHeader("x-vanity", result));
     }
 
@@ -72,6 +83,7 @@ public class BookmarkController {
                                                                        @RequestParam(required = false) String keyword,
                                                                        @RequestParam(required = false, defaultValue = "0") Integer from,
                                                                        @RequestParam(required = false, defaultValue = "10") Integer size) {
+        // Item-level filtering currently supports keyword; pagination is delegated to service.
         var criteria = new HashMap<String, Object>();
         if (keyword != null) {
             criteria.put("keyword", keyword);
