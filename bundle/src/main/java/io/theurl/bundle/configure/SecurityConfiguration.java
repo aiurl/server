@@ -31,9 +31,7 @@ public class SecurityConfiguration {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
             .authorizeHttpRequests(auth -> {
-
-                auth.requestMatchers(HttpMethod.GET, "/api/bundle/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/bookmark/**").permitAll()
+                auth.requestMatchers(HttpMethod.GET, "/api/bundle/**", "/api/bookmark/**", "/api/frequency/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/bookmark/my").authenticated()
                     .requestMatchers(
                         "/v3/api-docs/**",
