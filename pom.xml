@@ -9,7 +9,7 @@
     </parent>
     <groupId>io.theurl</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0</version>
+    <version>${revision}</version>
 
     <packaging>pom</packaging>
 
@@ -23,6 +23,7 @@
         <module>identity</module>
         <module>shared</module>
         <module>message</module>
+        <module>analysis</module>
     </modules>
 
     <scm>
@@ -40,9 +41,10 @@
     </developers>
 
     <properties>
+        <revision>1.0.0</revision>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
-        <project.version>1.0</project.version>
+        <project.version>${revision}</project.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>25</java.version>
