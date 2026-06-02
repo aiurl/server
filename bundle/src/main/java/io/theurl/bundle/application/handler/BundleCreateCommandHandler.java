@@ -28,7 +28,7 @@ public class BundleCreateCommandHandler implements Handler<BundleCreateCommand, 
 
     @Override
     public CompletableFuture<Void> handleAsync(BundleCreateCommand message, MessageContext context) {
-        var userId = Long.getLong(Objects.requireNonNull(getRequest()).getUserPrincipal().getName());
+        var userId = Long.parseLong(Objects.requireNonNull(getRequest()).getUserPrincipal().getName());
         var aggregate = Bundle.create(message.getType(), message.getVanity(), message.getName());
         if (message.getDescription() != null) {
             aggregate.setDescription(message.getDescription());

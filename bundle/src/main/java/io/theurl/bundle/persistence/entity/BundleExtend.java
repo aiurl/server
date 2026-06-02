@@ -14,8 +14,8 @@ public class BundleExtend implements Persistable<Long> {
     @Id
     private Long id;
 
-    @Column(name = "item_count")
-    private int itemCount;
+    @Column(name = "items_count")
+    private int itemsCount;
 
     @Column(name = "favorite_count")
     private int favoriteCount;

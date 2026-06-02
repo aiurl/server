@@ -1,6 +1,7 @@
 package io.theurl.bundle.persistence.profile;
 
 import io.theurl.bundle.persistence.entity.Bundle;
+import io.theurl.bundle.persistence.model.BundleListModel;
 import jakarta.annotation.PostConstruct;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.Provider;
@@ -69,6 +70,14 @@ public class BundleMapProfile {
 //                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
 //                      dest.getExtend().setLastVisitedAt(extend.getLastVisitedAt());
 //                  });
+              });
+
+        mapper.createTypeMap(io.theurl.bundle.persistence.entity.Bundle.class, BundleListModel.class)
+              .addMappings(expression -> {
+                  expression.map(src -> src.getExtend().getItemsCount(), BundleListModel::setItemsCount);
+                  expression.map(src -> src.getExtend().getFavoriteCount(), BundleListModel::setFavoriteCount);
+                  expression.map(src -> src.getExtend().getCommentCount(), BundleListModel::setCommentCount);
+                  expression.map(src -> src.getExtend().getVisitCount(), BundleListModel::setVisitCount);
               });
     }
 

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "user_role", indexes = {
-    @Index(name = "user_role_idx_unique", columnList = "name,user_id", unique = true)
+    @Index(name = "idx_user_role_unique", columnList = "name,user_id", unique = true)
 })
 public class UserRole implements Persistable<Long> {
     @Id

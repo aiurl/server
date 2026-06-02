@@ -1,12 +1,15 @@
 package io.theurl.bundle.application.contract;
 
-import io.theurl.bundle.application.dto.BundleCreateDto;
-import io.theurl.bundle.application.dto.BundleItemEditDto;
-import io.theurl.bundle.application.dto.BundleUpdateDto;
+import io.theurl.bundle.application.dto.*;
 import io.theurl.framework.application.ApplicationService;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Application service for managing bundles. Provides methods for creating, updating, and deleting bundles, as well as managing items within bundles.
+ */
 public interface BundleApplicationService extends ApplicationService {
 
     /**
@@ -61,4 +64,12 @@ public interface BundleApplicationService extends ApplicationService {
      * @return A CompletableFuture that will complete when the item is removed.
      */
     CompletableFuture<Void> removeItemAsync(String vanity, long itemId);
+
+    CompletableFuture<List<BundleListDto>> searchAsync(Map<String, Object> criteria, int from, int size);
+
+    CompletableFuture<Integer> countAsync(Map<String, Object> criteria);
+
+    CompletableFuture<List<BundleItemListDto>> searchItemsAsync(String vanity, Map<String, Object> criteria, int from, int size);
+
+    CompletableFuture<Integer> countItemsAsync(String vanity, Map<String, Object> criteria);
 }

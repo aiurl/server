@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "user_authority", indexes = {
-    @Index(name = "user_authority_idx_unique", columnList = "provider,open_id,user_id", unique = true)
+    @Index(name = "idx_user_authority_unique", columnList = "provider,open_id,user_id", unique = true)
 })
 public class UserAuthority implements Persistable<Long> {
     @Id

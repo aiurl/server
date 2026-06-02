@@ -5,14 +5,18 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.theurl.bundle.application.contract.BundleApplicationService;
 import io.theurl.bundle.application.dto.BundleCreateDto;
 import io.theurl.bundle.application.dto.BundleItemEditDto;
+import io.theurl.bundle.application.dto.BundleListDto;
 import io.theurl.bundle.application.dto.BundleUpdateDto;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/api/bundles")
+@RequestMapping("/api/bundle")
 public class BundleController {
 
     private final BundleApplicationService service;
@@ -33,7 +37,7 @@ public class BundleController {
      */
     @PostMapping
     @Operation(summary = "Create a new bundle", security = @SecurityRequirement(name = "bearerAuth"))
-    public CompletableFuture<Void> create(@RequestBody BundleCreateDto data, HttpServletResponse response) {
+    public CompletableFuture<Void> createAsync(@RequestBody BundleCreateDto data, HttpServletResponse response) {
         return service.createAsync(data)
                       .thenAccept(vanity -> response.addHeader("x-vanity", vanity));
     }
@@ -50,7 +54,7 @@ public class BundleController {
      */
     @PutMapping("/{vanity}")
     @Operation(summary = "Update an existing bundle", security = @SecurityRequirement(name = "bearerAuth"))
-    public CompletableFuture<Void> update(@PathVariable String vanity, @RequestBody BundleUpdateDto data) {
+    public CompletableFuture<Void> updateAsync(@PathVariable String vanity, @RequestBody BundleUpdateDto data) {
         return service.updateAsync(vanity, data);
     }
 
@@ -65,7 +69,7 @@ public class BundleController {
      */
     @DeleteMapping("/{vanity}")
     @Operation(summary = "Delete an existing bundle", security = @SecurityRequirement(name = "bearerAuth"))
-    public CompletableFuture<Void> delete(@PathVariable String vanity) {
+    public CompletableFuture<Void> deleteAsync(@PathVariable String vanity) {
         return service.deleteAsync(vanity);
     }
 
@@ -79,9 +83,9 @@ public class BundleController {
      * @param data   The data for the item to be appended.
      * @return A CompletableFuture representing the asynchronous operation.
      */
-    @PostMapping("/{vanity}/append")
+    @PostMapping("/{vanity}/items")
     @Operation(summary = "Append items to an existing bundle", security = @SecurityRequirement(name = "bearerAuth"))
-    public CompletableFuture<Void> append(@PathVariable String vanity, @RequestBody BundleItemEditDto data) {
+    public CompletableFuture<Void> appendItemAsync(@PathVariable String vanity, @RequestBody BundleItemEditDto data) {
         return service.appendItemAsync(vanity, data);
     }
 
@@ -95,9 +99,9 @@ public class BundleController {
      * @param itemId The ID of the item to be removed.
      * @return A CompletableFuture representing the asynchronous operation.
      */
-    @DeleteMapping("/{vanity}/{itemId}")
+    @DeleteMapping("/{vanity}/items/{itemId}")
     @Operation(summary = "Remove an item from an existing bundle", security = @SecurityRequirement(name = "bearerAuth"))
-    public CompletableFuture<Void> remove(@PathVariable String vanity, @PathVariable long itemId) {
+    public CompletableFuture<Void> removeItemAsync(@PathVariable String vanity, @PathVariable long itemId) {
         return service.removeItemAsync(vanity, itemId);
     }
 
@@ -112,9 +116,35 @@ public class BundleController {
      * @param data   The updated data for the item.
      * @return A CompletableFuture representing the asynchronous operation.
      */
-    @PutMapping("/{vanity}/{itemId}")
+    @PutMapping("/{vanity}/items/{itemId}")
     @Operation(summary = "Update an item in an existing bundle", security = @SecurityRequirement(name = "bearerAuth"))
-    public CompletableFuture<Void> updateItem(@PathVariable String vanity, @PathVariable long itemId, @RequestBody BundleItemEditDto data) {
+    public CompletableFuture<Void> updateItemAsync(@PathVariable String vanity, @PathVariable long itemId, @RequestBody BundleItemEditDto data) {
         return service.updateItemAsync(vanity, itemId, data);
+    }
+
+    @GetMapping("list")
+    @Operation(summary = "Search bundles by type and keyword")
+    public CompletableFuture<List<BundleListDto>> search(@RequestParam(required = false) String type, @RequestParam(required = false) String keyword, @RequestParam Integer from, @RequestParam Integer size) {
+        var criteria = new HashMap<String, Object>();
+        if (StringUtils.hasText(type)) {
+            criteria.put("type", type);
+        }
+        if (StringUtils.hasText(keyword)) {
+            criteria.put("keyword", keyword);
+        }
+        return service.searchAsync(criteria, from, size);
+    }
+
+    @GetMapping("count")
+    @Operation(summary = "Count bundles by type and keyword")
+    public CompletableFuture<Integer> count(@RequestParam(required = false) String type, @RequestParam(required = false) String keyword) {
+        var criteria = new HashMap<String, Object>();
+        if (StringUtils.hasText(type)) {
+            criteria.put("type", type);
+        }
+        if (StringUtils.hasText(keyword)) {
+            criteria.put("keyword", keyword);
+        }
+        return service.countAsync(criteria);
     }
 }

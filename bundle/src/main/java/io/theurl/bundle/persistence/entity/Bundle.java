@@ -30,7 +30,7 @@ public class Bundle implements Persistable<Long> {
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "text")
     private String description;
 
     @Column(name = "image")

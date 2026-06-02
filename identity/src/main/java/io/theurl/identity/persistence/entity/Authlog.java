@@ -1,9 +1,6 @@
 package io.theurl.identity.persistence.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.domain.Persistable;
 
@@ -11,7 +8,10 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "authlog")
+@Table(name = "authlog", indexes = {
+    @Index(name = "idx_authlog_user_id", columnList = "user_id"),
+    @Index(name = "idx_authlog_username", columnList = "username")
+})
 public class Authlog implements Persistable<Long> {
     @Id
     private Long id;

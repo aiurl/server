@@ -1,8 +1,9 @@
 package io.theurl.bundle.application.command;
 
 import com.neroyun.mediator.Command;
+import lombok.Data;
 
-@SuppressWarnings({"LombokGetterMayBeUsed", "LombokSetterMayBeUsed"})
+@Data
 public class BundleUpdateCommand implements Command {
     private final String vanity;
 
@@ -12,33 +13,5 @@ public class BundleUpdateCommand implements Command {
 
     public BundleUpdateCommand(String vanity) {
         this.vanity = vanity;
-    }
-
-    public String getVanity() {
-        return vanity;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
     }
 }
