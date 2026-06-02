@@ -1,0 +1,60 @@
+server:
+    port: 8904
+
+spring:
+    profiles:
+        active: ${SPRING_PROFILES_ACTIVE:dev}
+    application:
+        name: analysis
+    config:
+        import: optional:configserver:${CONFIG_SERVER_URI:http://localhost:8900/env}
+    cloud:
+        config:
+            fail-fast: true
+            enabled: true
+            uri: ${CONFIG_SERVER_URI:http://localhost:8900/env}
+            label: master
+            profile: ${SPRING_PROFILES_ACTIVE:dev}
+    datasource:
+        url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou?currentSchema=public}
+        username: ${DB_USERNAME:postgres}
+        password: ${DB_PASSWORD:postgres}
+        driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+    jpa:
+        hibernate:
+            ddl-auto: update
+            dialect: ${DB_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+        show-sql: true
+        properties:
+            hibernate:
+                globally_quoted_identifiers: true
+                multiTenancy: SCHEMA
+                format_sql: true
+    data:
+        redis:
+            url: ${REDIS_URL:redis://localhost:6379}
+    web:
+        error:
+            include-message: ALWAYS
+            include-exception: true
+            include-stacktrace: ALWAYS
+    rabbitmq:
+        host: ${RABBITMQ_HOST:127.0.0.1}
+        port: ${RABBITMQ_PORT:5672}
+        username: ${RABBITMQ_USERNAME:guest}
+        password: ${RABBITMQ_PASSWORD:guest}
+
+jwt:
+    secret: ${JWT_SECRET:your-jwt-secret}
+    issuer: theurl.io
+    expiration: 3600 # in seconds
+
+logging:
+    file:
+        name: #{level}-{T(java.time.LocalDate).now()}.log
+        path: logs
+    level:
+        io.theurl.identity: debug
+        org.springframework.cloud.config.client: debug
+        org.springframework: error
+        root: info
