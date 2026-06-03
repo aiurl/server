@@ -128,7 +128,7 @@ public class Bundle extends AggregateRoot<Long> {
 
     public void clearItems() {
         items.clear();
-        extend.setItemCount(0);
+        extend.setItemsCount(0);
     }
 
     public BundleExtend getExtend() {
