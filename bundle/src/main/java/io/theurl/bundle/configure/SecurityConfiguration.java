@@ -1,13 +1,17 @@
 package io.theurl.bundle.configure;
 
 import io.theurl.framework.security.JwtAuthenticationFilter;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -43,17 +47,22 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        http.securityContext(securityContext -> securityContext.requireExplicitSave(false))
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
+            .exceptionHandling(ex -> {
+                ex.authenticationEntryPoint((request, response, authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+                });
+            })
             .authorizeHttpRequests(auth -> {
                 // More specific patterns must come before more general ones.
                 // Authenticated endpoints must be resolved before wildcard patterns.
-                auth.requestMatchers(HttpMethod.GET, "/api/bookmark/my").authenticated()
-                    .requestMatchers(HttpMethod.POST, "/api/bookmark/*/items").permitAll()
+                auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/bookmark/my").authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/bundle/**", "/api/bookmark/**", "/api/frequency/**").permitAll()
                     .requestMatchers(
                         "/v3/api-docs/**",
@@ -66,5 +75,21 @@ public class SecurityConfiguration {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @PostConstruct
+    public void enableInheritableSecurityContext() {
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+    }
+
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(JwtAuthenticationFilter jwtFilter) {
+        FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(jwtFilter);
+        registration.addUrlPatterns("/*");
+        registration.setDispatcherTypes(DispatcherType.REQUEST);
+        //registration.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.ASYNC);
+        registration.setOrder(1);
+        return registration;
     }
 }
