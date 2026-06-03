@@ -1,7 +1,7 @@
 package io.theurl.bundle.persistence.repository;
 
-import io.theurl.bundle.domain.aggregate.Bundle;
 import io.theurl.bundle.domain.repository.BundleRepository;
+import io.theurl.bundle.persistence.entity.Bundle;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Repository;
 
@@ -18,12 +18,15 @@ public class BundleRepositoryImpl implements BundleRepository {
     }
 
     @Override
-    public void save(Bundle bundle, long operatorId) {
+    public void save(io.theurl.bundle.domain.aggregate.Bundle bundle, long operatorId) {
         var entity = repository.findById(bundle.getId())
                                .orElse(null);
         if (entity == null) {
-            entity = mapper.map(bundle, io.theurl.bundle.persistence.entity.Bundle.class);
+            entity = mapper.map(bundle, Bundle.class);
             entity.setCreatedBy(operatorId);
+            entity.setUpdatedBy(operatorId);
+            entity.setCreatedAt(LocalDateTime.now());
+            entity.setUpdatedAt(LocalDateTime.now());
         } else if (bundle.isDeleted()) {
             entity.setDeleted(true);
             entity.setDeletedBy(operatorId);
@@ -31,27 +34,28 @@ public class BundleRepositoryImpl implements BundleRepository {
         } else {
             mapper.map(bundle, entity);
             entity.setUpdatedBy(operatorId);
+            entity.setUpdatedAt(LocalDateTime.now());
         }
 
         repository.save(entity);
     }
 
     @Override
-    public Bundle findById(Long id) {
+    public io.theurl.bundle.domain.aggregate.Bundle findById(Long id) {
         var entity = repository.findById(id).orElse(null);
         if (entity == null) {
             return null;
         }
-        return mapper.map(entity, Bundle.class);
+        return mapper.map(entity, io.theurl.bundle.domain.aggregate.Bundle.class);
     }
 
     @Override
-    public Bundle findByVanity(String vanity) {
+    public io.theurl.bundle.domain.aggregate.Bundle findByVanity(String vanity) {
         var entity = repository.findByVanity(vanity)
                                .orElse(null);
         if (entity == null || entity.isDeleted()) {
             return null;
         }
-        return mapper.map(entity, Bundle.class);
+        return mapper.map(entity, io.theurl.bundle.domain.aggregate.Bundle.class);
     }
 }
