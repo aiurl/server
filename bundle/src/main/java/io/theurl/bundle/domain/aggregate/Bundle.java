@@ -120,6 +120,13 @@ public class Bundle extends AggregateRoot<Long> {
         extend.incrementItemCount();
     }
 
+    public void updateItem(long itemId, String title, String description, String image) {
+        var item = items.stream().filter(i -> i.getId() == itemId).findFirst().orElseThrow(() -> new IllegalArgumentException("Item not found."));
+        item.setTitle(title);
+        item.setDescription(description);
+        item.setImage(image);
+    }
+
     public void removeItem(long id) {
         if (items.removeIf(item -> item.getId() == id)) {
             extend.decrementItemCount();
