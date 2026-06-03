@@ -46,38 +46,37 @@ public class BundleMapProfile {
                   expression.map(Bundle::getDescription, io.theurl.bundle.domain.aggregate.Bundle::setDescription);
                   expression.map(Bundle::getImage, io.theurl.bundle.domain.aggregate.Bundle::setImage);
                   expression.map(Bundle::getOrder, io.theurl.bundle.domain.aggregate.Bundle::setOrder);
-//                  expression.map(Bundle::getItems, (dest, value) -> {
-//                      if(dest != null && value != null) {
-//                          var items = dest.getItems();
-//                          items.add(mapper.map(value, io.theurl.bundle.domain.aggregate.BundleItem.class));
-//                      }
-//                  });
-//                  expression.map(Bundle::getComments, (dest, value) -> {
-//                      if (dest == null || value == null) {
-//                          return;
-//                      }
-//                      var comments = dest.getComments();
-//                      comments.add(mapper.map(value, io.theurl.bundle.domain.aggregate.BundleComment.class));
-//                  });
-//                  expression.map(Bundle::getExtend, (dest, value) -> {
-//                      if (dest == null || value == null) {
-//                          return;
-//                      }
-//                      var extend = (io.theurl.bundle.domain.aggregate.BundleExtend) value;
-//                      dest.getExtend().setItemCount(extend.getItemCount());
-//                      dest.getExtend().setCommentCount(extend.getCommentCount());
-//                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
-//                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
-//                      dest.getExtend().setLastVisitedAt(extend.getLastVisitedAt());
-//                  });
+                  // Extend fields are copied in setPostConverter below to avoid "Illegal DestinationSetter":
+                  // BundleExtend (domain) has no no-arg constructor, so ModelMapper's proxy-based
+                  // destination recorder cannot introspect nested paths like dest.getExtend().setXxx().
+                  // No explicit skip needed: domain Bundle has no setExtend(), so ModelMapper ignores it.
+              })
+              .setPostConverter(ctx -> {
+                  var src = ctx.getSource();
+                  var dest = ctx.getDestination();
+                  var extend = src.getExtend();
+                  if (extend != null) {
+                      dest.getExtend().setItemCount(extend.getItemsCount());
+                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
+                      dest.getExtend().setCommentCount(extend.getCommentCount());
+                      dest.getExtend().setVisitCount(extend.getVisitCount());
+                      dest.getExtend().setLastVisitedAt(extend.getLastVisitedAt());
+                  }
+                  return dest;
               });
 
         mapper.createTypeMap(io.theurl.bundle.persistence.entity.Bundle.class, BundleListModel.class)
-              .addMappings(expression -> {
-                  expression.map(src -> src.getExtend().getItemsCount(), BundleListModel::setItemsCount);
-                  expression.map(src -> src.getExtend().getFavoriteCount(), BundleListModel::setFavoriteCount);
-                  expression.map(src -> src.getExtend().getCommentCount(), BundleListModel::setCommentCount);
-                  expression.map(src -> src.getExtend().getVisitCount(), BundleListModel::setVisitCount);
+              .setPostConverter(ctx -> {
+                  var src = ctx.getSource();
+                  var dest = ctx.getDestination();
+                  var extend = src.getExtend();
+                  if (extend != null) {
+                      dest.setItemsCount(extend.getItemsCount());
+                      dest.setFavoriteCount(extend.getFavoriteCount());
+                      dest.setCommentCount(extend.getCommentCount());
+                      dest.setVisitCount(extend.getVisitCount());
+                  }
+                  return dest;
               });
     }
 
