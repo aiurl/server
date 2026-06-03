@@ -110,7 +110,7 @@ public class Bundle extends AggregateRoot<Long> {
 
     public void appendItem(String url, String title, String description, String image) {
         if (items.stream().anyMatch(item -> item.getUrl().equals(url))) {
-            return;
+            throw new IllegalArgumentException("An item with the same URL already exists in the bundle.");
         }
         var item = BundleItem.create(url, title);
         item.setDescription(description);
