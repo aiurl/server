@@ -31,6 +31,7 @@ public class Bundle extends AggregateRoot<Long> {
     private String ownerName;
     private List<BundleItem> items = new ArrayList<>();
     private List<BundleComment> comments = new ArrayList<>();
+    private List<String> labels = new ArrayList<>();
     private BundleExtend extend;
     private boolean deleted;
 
@@ -136,6 +137,18 @@ public class Bundle extends AggregateRoot<Long> {
     public void clearItems() {
         items.clear();
         extend.setItemsCount(0);
+    }
+
+    public List<String> getLabels() {
+        return Collections.unmodifiableList(labels);
+    }
+
+    public void addLabel(String label) {
+        labels.add(label);
+    }
+
+    public void removeLabel(String label) {
+        labels.remove(label);
     }
 
     public BundleExtend getExtend() {
