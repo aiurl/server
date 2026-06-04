@@ -48,11 +48,11 @@ public class Bundle implements Persistable<Long> {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     @Column(name = "created_by")
     private long createdBy;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Column(name = "updated_by")
     private long updatedBy;
@@ -71,6 +71,9 @@ public class Bundle implements Persistable<Long> {
 
     @OneToMany(mappedBy = "bundle", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<BundleComment> comments;
+
+    @OneToMany(mappedBy = "bundle", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<BundleLabel> labels;
 
     @OneToOne(mappedBy = "bundle", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private BundleExtend extend;

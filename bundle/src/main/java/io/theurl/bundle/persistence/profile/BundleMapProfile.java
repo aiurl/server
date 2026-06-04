@@ -1,7 +1,9 @@
 package io.theurl.bundle.persistence.profile;
 
 import io.theurl.bundle.persistence.entity.BundleItem;
+import io.theurl.bundle.persistence.entity.BundleLabel;
 import io.theurl.bundle.persistence.model.BundleListModel;
+import io.theurl.framework.utility.SnowflakeId;
 import jakarta.annotation.PostConstruct;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,9 @@ public class BundleMapProfile {
                       destItem.setImage(item.getImage());
                       return destItem;
                   });
+
+                  setCollection(dest, "labels", src.getLabels(), BundleLabel::getName);
+
                   return dest;
               });
 
@@ -131,6 +136,15 @@ public class BundleMapProfile {
                           destComment.setContact(comment.getContact());
                           destComment.setCreatedAt(comment.getCreatedAt());
                           dest.getComments().add(destComment);
+                      }
+                  }
+                  for (var label : src.getLabels()) {
+                      var entity = dest.getLabels().stream().filter(l -> l.getName().equals(label)).findFirst().orElse(null);
+                      if (entity == null) {
+                          var destLabel = new BundleLabel();
+                          destLabel.setId(SnowflakeId.getInstance().nextId());
+                          destLabel.setName(label);
+                          dest.getLabels().add(destLabel);
                       }
                   }
                   return dest;
