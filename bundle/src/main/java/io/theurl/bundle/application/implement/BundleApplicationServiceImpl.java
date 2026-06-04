@@ -1,9 +1,7 @@
 package io.theurl.bundle.application.implement;
 
 import com.neroyun.mediator.Event;
-import io.theurl.bundle.application.command.BundleCreateCommand;
-import io.theurl.bundle.application.command.BundleDeleteCommand;
-import io.theurl.bundle.application.command.BundleUpdateCommand;
+import io.theurl.bundle.application.command.*;
 import io.theurl.bundle.application.contract.BundleApplicationService;
 import io.theurl.bundle.application.dto.*;
 import io.theurl.bundle.persistence.query.BundleCountQuery;
@@ -126,17 +124,22 @@ public class BundleApplicationServiceImpl extends BaseApplicationService impleme
 
     @Override
     public CompletableFuture<Void> appendItemAsync(String vanity, BundleItemEditDto data) {
-        return null;
+        var command = new BundleItemAppendCommand(vanity);
+        mapper.map(data, command);
+        return mediator.sendAsync(command);
     }
 
     @Override
     public CompletableFuture<Void> updateItemAsync(String vanity, long itemId, BundleItemEditDto data) {
-        return null;
+        var command = new BundleItemUpdateCommand(vanity, itemId);
+        mapper.map(data, command);
+        return mediator.sendAsync(command);
     }
 
     @Override
     public CompletableFuture<Void> removeItemAsync(String vanity, long itemId) {
-        return null;
+        var command = new BundleItemRemoveCommand(vanity, itemId);
+        return mediator.sendAsync(command);
     }
 
     @Override

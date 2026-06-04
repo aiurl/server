@@ -15,18 +15,18 @@ public class BundleExtend extends AggregateRoot<Long> {
         super(id);
     }
 
-    private int itemCount;
+    private int itemsCount;
     private int favoriteCount;
     private int commentCount;
     private int visitCount;
     private LocalDateTime lastVisitedAt;
 
-    public int getItemCount() {
-        return itemCount;
+    public int getItemsCount() {
+        return itemsCount;
     }
 
-    public void setItemCount(int itemCount) {
-        this.itemCount = itemCount;
+    public void setItemsCount(int itemsCount) {
+        this.itemsCount = itemsCount;
     }
 
     public int getFavoriteCount() {
@@ -62,7 +62,7 @@ public class BundleExtend extends AggregateRoot<Long> {
     }
 
     public void incrementItemCount() {
-        this.itemCount++;
+        this.itemsCount++;
     }
 
     public void incrementFavoriteCount() {
@@ -78,8 +78,8 @@ public class BundleExtend extends AggregateRoot<Long> {
     }
 
     public void decrementItemCount() {
-        if (this.itemCount > 0) {
-            this.itemCount--;
+        if (this.itemsCount > 0) {
+            this.itemsCount--;
         }
     }
 

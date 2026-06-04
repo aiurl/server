@@ -1,12 +1,19 @@
 package io.theurl.bundle.persistence.profile;
 
-import io.theurl.bundle.persistence.entity.Bundle;
+import io.theurl.bundle.persistence.entity.BundleItem;
+import io.theurl.bundle.persistence.entity.BundleLabel;
 import io.theurl.bundle.persistence.model.BundleListModel;
+import io.theurl.framework.utility.SnowflakeId;
 import jakarta.annotation.PostConstruct;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.Provider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.function.Function;
 
 @Component
 public class BundleMapProfile {
@@ -15,90 +22,156 @@ public class BundleMapProfile {
 
     @PostConstruct
     public void configure() {
-        Provider<io.theurl.bundle.domain.aggregate.Bundle> provider = request -> {
-            var source = request.getSource();
 
-            Long id;
-
-            if (source instanceof io.theurl.bundle.domain.aggregate.Bundle entity) {
-                id = entity.getId();
-            } else {
-                try {
-                    var field = source.getClass().getDeclaredField("id");
-                    field.setAccessible(true);
-                    id = (Long) field.get(source);
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new RuntimeException("Failed to create provider for Bundle", e);
-                }
-            }
-
-            return new io.theurl.bundle.domain.aggregate.Bundle(id);
-        };
-
+        // entity.Bundle → domain.Bundle
+        // Uses setConverter (not setProvider + addMappings) to prevent ModelMapper from
+        // auto-mapping the 'extend' field via PRIVATE field access, which would try to
+        // instantiate domain.BundleExtend — a class with no no-arg constructor.
         mapper.createTypeMap(io.theurl.bundle.persistence.entity.Bundle.class, io.theurl.bundle.domain.aggregate.Bundle.class)
-              .setProvider(provider)
-              .addMappings(expression -> {
-//                  expression.map(Bundle::getType, (dest, value) -> setValue(dest, "type", value));
-//                  expression.map(Bundle::getVanity, (dest, value) -> setValue(dest, "vanity", value));
-//                  expression.map(Bundle::getOwnerId, (dest, value) -> setValue(dest, "ownerId", value));
-//                  expression.map(Bundle::getOwnerName, (dest, value) -> setValue(dest, "ownerName", value));
-                  expression.map(Bundle::getName, io.theurl.bundle.domain.aggregate.Bundle::setName);
-                  expression.map(Bundle::getDescription, io.theurl.bundle.domain.aggregate.Bundle::setDescription);
-                  expression.map(Bundle::getImage, io.theurl.bundle.domain.aggregate.Bundle::setImage);
-                  expression.map(Bundle::getOrder, io.theurl.bundle.domain.aggregate.Bundle::setOrder);
-//                  expression.map(Bundle::getItems, (dest, value) -> {
-//                      if(dest != null && value != null) {
-//                          var items = dest.getItems();
-//                          items.add(mapper.map(value, io.theurl.bundle.domain.aggregate.BundleItem.class));
-//                      }
-//                  });
-//                  expression.map(Bundle::getComments, (dest, value) -> {
-//                      if (dest == null || value == null) {
-//                          return;
-//                      }
-//                      var comments = dest.getComments();
-//                      comments.add(mapper.map(value, io.theurl.bundle.domain.aggregate.BundleComment.class));
-//                  });
-//                  expression.map(Bundle::getExtend, (dest, value) -> {
-//                      if (dest == null || value == null) {
-//                          return;
-//                      }
-//                      var extend = (io.theurl.bundle.domain.aggregate.BundleExtend) value;
-//                      dest.getExtend().setItemCount(extend.getItemCount());
-//                      dest.getExtend().setCommentCount(extend.getCommentCount());
-//                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
-//                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
-//                      dest.getExtend().setLastVisitedAt(extend.getLastVisitedAt());
-//                  });
+              .setConverter(ctx -> {
+                  var src = ctx.getSource();
+                  assert src.getId() != null;
+                  var dest = new io.theurl.bundle.domain.aggregate.Bundle(src.getId());
+                  setValue(dest, "type", src.getType());
+                  setValue(dest, "vanity", src.getVanity());
+                  setValue(dest, "ownerId", src.getOwnerId());
+                  setValue(dest, "ownerName", src.getOwnerName());
+                  dest.setName(src.getName());
+                  dest.setDescription(src.getDescription());
+                  dest.setImage(src.getImage());
+                  dest.setOrder(src.getOrder());
+                  var extend = src.getExtend();
+                  if (extend != null) {
+                      dest.getExtend().setItemsCount(extend.getItemsCount());
+                      dest.getExtend().setFavoriteCount(extend.getFavoriteCount());
+                      dest.getExtend().setCommentCount(extend.getCommentCount());
+                      dest.getExtend().setVisitCount(extend.getVisitCount());
+                      dest.getExtend().setLastVisitedAt(extend.getLastVisitedAt());
+                  }
+
+                  setCollection(dest, "comments", src.getComments(), comment -> {
+                      var destComment = new io.theurl.bundle.domain.aggregate.BundleComment(Objects.requireNonNull(comment.getId()));
+                      destComment.setAuthorId(comment.getAuthorId());
+                      destComment.setAuthorName(comment.getAuthorName());
+                      destComment.setContent(comment.getContent());
+                      destComment.setContact(comment.getContact());
+                      destComment.setCreatedAt(comment.getCreatedAt());
+                      return destComment;
+                  });
+
+                  setCollection(dest, "items", src.getItems(), item -> {
+                      var destItem = new io.theurl.bundle.domain.aggregate.BundleItem(Objects.requireNonNull(item.getId()));
+                      destItem.setUrl(item.getUrl());
+                      destItem.setTitle(item.getTitle());
+                      destItem.setDescription(item.getDescription());
+                      destItem.setImage(item.getImage());
+                      return destItem;
+                  });
+
+                  setCollection(dest, "labels", src.getLabels(), BundleLabel::getName);
+
+                  return dest;
               });
 
+        // entity.Bundle → BundleListModel
+        // Direct fields (id, type, vanity, name, …) are auto-mapped; extend fields
+        // are copied in setPostConverter since BundleListModel has no 'extend' field
+        // so ModelMapper never attempts to deep-map into it.
         mapper.createTypeMap(io.theurl.bundle.persistence.entity.Bundle.class, BundleListModel.class)
+              .setPostConverter(ctx -> {
+                  var src = ctx.getSource();
+                  var dest = ctx.getDestination();
+                  var extend = src.getExtend();
+                  if (extend != null) {
+                      dest.setItemsCount(extend.getItemsCount());
+                      dest.setFavoriteCount(extend.getFavoriteCount());
+                      dest.setCommentCount(extend.getCommentCount());
+                      dest.setVisitCount(extend.getVisitCount());
+                  }
+                  return dest;
+              });
+
+        mapper.createTypeMap(io.theurl.bundle.domain.aggregate.Bundle.class, io.theurl.bundle.persistence.entity.Bundle.class)
               .addMappings(expression -> {
-                  expression.map(src -> src.getExtend().getItemsCount(), BundleListModel::setItemsCount);
-                  expression.map(src -> src.getExtend().getFavoriteCount(), BundleListModel::setFavoriteCount);
-                  expression.map(src -> src.getExtend().getCommentCount(), BundleListModel::setCommentCount);
-                  expression.map(src -> src.getExtend().getVisitCount(), BundleListModel::setVisitCount);
+                  expression.skip(io.theurl.bundle.persistence.entity.Bundle::setComments);
+                  expression.skip(io.theurl.bundle.persistence.entity.Bundle::setItems);
+              })
+              .setPostConverter(ctx -> {
+                  var src = ctx.getSource();
+                  var dest = ctx.getDestination();
+                  if (dest.getItems() == null) {
+                      dest.setItems(new HashSet<>());
+                  }
+                  if (dest.getComments() == null) {
+                      dest.setComments(new HashSet<>());
+                  }
+                  for (var item : src.getItems()) {
+                      var destItem = dest.getItems().stream().filter(i -> {
+                          assert i.getId() != null;
+                          return i.getId().equals(item.getId());
+                      }).findFirst().orElse(null);
+                      if (destItem == null) {
+                          destItem = new BundleItem();
+                          destItem.setId(item.getId());
+                          destItem.setBundleId(Objects.requireNonNull(dest.getId()));
+                          dest.getItems().add(destItem);
+                      }
+                      destItem.setUrl(item.getUrl());
+                      destItem.setTitle(item.getTitle());
+                      destItem.setDescription(item.getDescription());
+                      destItem.setImage(item.getImage());
+                      destItem.setOrder(item.getOrder());
+                  }
+                  for (var comment : src.getComments()) {
+                      var destComment = dest.getComments().stream().filter(c -> {
+                          assert c.getId() != null;
+                          return c.getId().equals(comment.getId());
+                      }).findFirst().orElse(null);
+                      if (destComment == null) {
+                          destComment = new io.theurl.bundle.persistence.entity.BundleComment();
+                          destComment.setId(comment.getId());
+                          destComment.setAuthorId(comment.getAuthorId());
+                          destComment.setAuthorName(comment.getAuthorName());
+                          destComment.setContent(comment.getContent());
+                          destComment.setContact(comment.getContact());
+                          destComment.setCreatedAt(comment.getCreatedAt());
+                          dest.getComments().add(destComment);
+                      }
+                  }
+                  for (var label : src.getLabels()) {
+                      var entity = dest.getLabels().stream().filter(l -> l.getName().equals(label)).findFirst().orElse(null);
+                      if (entity == null) {
+                          var destLabel = new BundleLabel();
+                          destLabel.setId(SnowflakeId.getInstance().nextId());
+                          destLabel.setName(label);
+                          dest.getLabels().add(destLabel);
+                      }
+                  }
+                  return dest;
               });
     }
 
-    /**
-     * Set value to the field of the destination object using reflection.
-     * This is necessary because some fields in the domain aggregate are not directly mapped from the entity, but need to be set manually after mapping.
-     *
-     * @param bundle the destination bundle object
-     * @param name   the name of the field to set
-     * @param value  the value to set
-     */
     private void setValue(io.theurl.bundle.domain.aggregate.Bundle bundle, String name, Object value) {
         try {
-            if (value == null || bundle == null) {
-                return;
-            }
-            var field = bundle.getClass().getSuperclass().getDeclaredField(name);
+            var field = io.theurl.bundle.domain.aggregate.Bundle.class.getDeclaredField(name);
             field.setAccessible(true);
             field.set(bundle, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private <S, D> void setCollection(io.theurl.bundle.domain.aggregate.Bundle bundle, String name, Collection<S> source, Function<S, D> convert) {
+        try {
+            var field = io.theurl.bundle.domain.aggregate.Bundle.class.getDeclaredField(name);
+            field.setAccessible(true);
+            var list = new ArrayList<D>();
+            for (var item : source) {
+                list.add(convert.apply(item));
+            }
+            field.set(bundle, list);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            System.err.println(e.getMessage());
         }
     }
 }

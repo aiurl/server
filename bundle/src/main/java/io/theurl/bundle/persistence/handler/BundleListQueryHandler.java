@@ -52,7 +52,9 @@ public class BundleListQueryHandler implements Handler<BundleListQuery, List<Bun
                         predicates.add(orGroup);
                     }
                 }
-                default -> predicates.add(builder.equal(select.get(k), v));
+                default -> {
+                    //predicates.add(builder.equal(select.get(k), v));
+                }
             }
         });
 

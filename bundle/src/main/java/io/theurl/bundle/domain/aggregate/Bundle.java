@@ -31,6 +31,7 @@ public class Bundle extends AggregateRoot<Long> {
     private String ownerName;
     private List<BundleItem> items = new ArrayList<>();
     private List<BundleComment> comments = new ArrayList<>();
+    private List<String> labels = new ArrayList<>();
     private BundleExtend extend;
     private boolean deleted;
 
@@ -110,7 +111,7 @@ public class Bundle extends AggregateRoot<Long> {
 
     public void appendItem(String url, String title, String description, String image) {
         if (items.stream().anyMatch(item -> item.getUrl().equals(url))) {
-            return;
+            throw new IllegalArgumentException("An item with the same URL already exists in the bundle.");
         }
         var item = BundleItem.create(url, title);
         item.setDescription(description);
@@ -118,6 +119,13 @@ public class Bundle extends AggregateRoot<Long> {
         item.setOrder(items.size() + 1);
         items.add(item);
         extend.incrementItemCount();
+    }
+
+    public void updateItem(long itemId, String title, String description, String image) {
+        var item = items.stream().filter(i -> i.getId() == itemId).findFirst().orElseThrow(() -> new IllegalArgumentException("Item not found."));
+        item.setTitle(title);
+        item.setDescription(description);
+        item.setImage(image);
     }
 
     public void removeItem(long id) {
@@ -128,7 +136,19 @@ public class Bundle extends AggregateRoot<Long> {
 
     public void clearItems() {
         items.clear();
-        extend.setItemCount(0);
+        extend.setItemsCount(0);
+    }
+
+    public List<String> getLabels() {
+        return Collections.unmodifiableList(labels);
+    }
+
+    public void addLabel(String label) {
+        labels.add(label);
+    }
+
+    public void removeLabel(String label) {
+        labels.remove(label);
     }
 
     public BundleExtend getExtend() {

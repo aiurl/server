@@ -46,6 +46,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ") && SecurityContextHolder.getContext().getAuthentication() == null) {
             String token = authHeader.substring(7);
             try {
+                // Validate signing key is configured
+                if (signingKey == null || signingKey.isBlank()) {
+                    LOGGER.warn("JWT signing key is not properly configured. Using default or empty key.");
+                }
+
                 var claims = Jwts.parser()
                                  .verifyWith(Keys.hmacShaKeyFor(signingKey.getBytes(StandardCharsets.UTF_8)))
                                  .build()
@@ -57,14 +62,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     var authentication = new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    LOGGER.debug("JWT authentication successful for user: {}", userId);
+                } else {
+                    LOGGER.debug("JWT token has no subject (userId)");
                 }
-            } catch (Exception e) {
+            } catch (io.jsonwebtoken.security.SignatureException e) {
                 // Don't throw an exception when token parsing fails, let the subsequent authentication process handle it and return 401.
+                LOGGER.debug("JWT signature validation failed: {}", e.getMessage());
+            } catch (io.jsonwebtoken.ExpiredJwtException e) {
+                LOGGER.debug("JWT token has expired: {}", e.getMessage());
+            } catch (io.jsonwebtoken.MalformedJwtException e) {
+                LOGGER.debug("JWT token is malformed: {}", e.getMessage());
+            } catch (Exception e) {
                 LOGGER.debug("JWT parse failed: {}", e.getMessage());
             }
+        } else if (authHeader == null) {
+            LOGGER.trace("No Authorization header found in request");
+        } else if (!authHeader.startsWith("Bearer ")) {
+            LOGGER.debug("Authorization header does not start with 'Bearer '");
         }
 
         filterChain.doFilter(request, response);
     }
-}
 
+//    @Override
+//    protected boolean shouldNotFilterAsyncDispatch() {
+//        return false;
+//    }
+}

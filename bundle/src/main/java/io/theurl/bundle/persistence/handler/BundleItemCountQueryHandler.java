@@ -4,7 +4,6 @@ import com.neroyun.mediator.Handler;
 import com.neroyun.mediator.MessageContext;
 import io.theurl.bundle.persistence.entity.Bundle;
 import io.theurl.bundle.persistence.entity.BundleItem;
-import io.theurl.bundle.persistence.model.BundleItemModel;
 import io.theurl.bundle.persistence.query.BundleItemCountQuery;
 import io.theurl.framework.core.BeanScope;
 import jakarta.persistence.EntityManager;

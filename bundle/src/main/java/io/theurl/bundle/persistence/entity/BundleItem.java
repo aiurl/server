@@ -5,6 +5,8 @@ import lombok.Data;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Persistable;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @Table(name = "bundle_item", indexes = {
@@ -19,13 +21,13 @@ public class BundleItem implements Persistable<Long> {
     @Column(name = "bundle_id", nullable = false, updatable = false)
     private long bundleId;
 
-    @Column(name = "url", nullable = false, updatable = false)
+    @Column(name = "url", nullable = false, updatable = false, columnDefinition = "text")
     private String url;
 
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description", length = 1000)
+    @Column(name = "description", columnDefinition = "text")
     private String description;
 
     @Column(name = "image", length = 500)
@@ -33,6 +35,12 @@ public class BundleItem implements Persistable<Long> {
 
     @Column(name = "order", nullable = false)
     private int order;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bundle_id", insertable = false, updatable = false)

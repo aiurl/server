@@ -262,8 +262,8 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
      */
     private String generateToken(String id, UserAuthInfo user, Date issuedAt, Date expiresAt) {
         Assert.notNull(user, "user cannot be null");
-        //var signingKey = environment.getProperty("JwtAuthenticationOptions.SigningKey");
         Assert.notNull(signingKey, "SigningKey cannot be null");
+        Assert.isTrue(signingKey.length() >= 32, "SigningKey must be at least 32 characters for HMAC-SHA-256");
 
         var builder = Jwts.builder();
         builder.subject(String.valueOf(user.getId())).id(id)
@@ -278,7 +278,7 @@ public class AuthApplicationServiceImpl extends BaseApplicationService implement
             }
         }
 
-        builder.signWith(Keys.hmacShaKeyFor(signingKey.getBytes()));
+        builder.signWith(Keys.hmacShaKeyFor(signingKey.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
         return builder.compact();
     }
 

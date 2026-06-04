@@ -1,17 +1,19 @@
 server:
-  port: 8903
+    port: 8903
 
 spring:
     profiles:
         active: ${SPRING_PROFILES_ACTIVE:dev}
     application:
-        name: identity
+        name: bundle
     config:
-        import: optional:file:.env[.properties]
+        import: optional:configserver:${CONFIG_SERVER_URI:http://localhost:8900/env}
     cloud:
         config:
-            enabled: false
-            uri: ${CONFIG_SERVER_URI:http://localhost:8900}
+            enabled: true
+            uri: ${CONFIG_SERVER_URI:http://localhost:8900/env}
+            label: master
+            profile: ${SPRING_PROFILES_ACTIVE:dev}
     datasource:
         url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou?currentSchema=public}
         username: ${DB_USERNAME:postgres}
@@ -30,8 +32,6 @@ spring:
     data:
         redis:
             url: ${REDIS_URL:redis://localhost:6379}
-        mongodb:
-            uri: ${MONGO_URI:mongodb://localhost:27017/linkyou}
     web:
         error:
             include-message: ALWAYS
@@ -58,6 +58,9 @@ external-auth:
         client-id: ${MICROSOFT_CLIENT_ID:your-microsoft-client-id}
         client-secret: ${MICROSOFT_CLIENT_SECRET:your-microsoft-client-secret}
 
+# JWT Configuration
+# IMPORTANT: Set JWT_SECRET environment variable in production to a strong random 32+ character string
+# Example: export JWT_SECRET="your-super-secret-key-at-least-32-characters-long-for-safety"
 jwt:
     secret: ${JWT_SECRET:your-jwt-secret}
     issuer: theurl.io
@@ -68,6 +71,7 @@ logging:
         name: #{level}-{T(java.time.LocalDate).now()}.log
         path: logs
     level:
-        io.theurl.identity: debug
+        io.theurl.bundle: debug
+        io.theurl.framework.security: debug
         org.springframework: debug
         root: info

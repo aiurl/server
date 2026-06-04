@@ -1,13 +1,20 @@
 server:
-  port: 8901
+    port: 8904
 
 spring:
     profiles:
         active: ${SPRING_PROFILES_ACTIVE:dev}
     application:
-        name: identity
+        name: analysis
     config:
         import: optional:configserver:${CONFIG_SERVER_URI:http://localhost:8900/env}
+    cloud:
+        config:
+            fail-fast: true
+            enabled: true
+            uri: ${CONFIG_SERVER_URI:http://localhost:8900/env}
+            label: master
+            profile: ${SPRING_PROFILES_ACTIVE:dev}
     datasource:
         url: ${DB_URL:jdbc:postgresql://localhost:5432/linkyou?currentSchema=public}
         username: ${DB_USERNAME:postgres}
@@ -37,24 +44,6 @@ spring:
         username: ${RABBITMQ_USERNAME:guest}
         password: ${RABBITMQ_PASSWORD:guest}
 
-external-auth:
-    redirect-uri: ${EXTERNAL_AUTH_REDIRECTURI:https://theurl.io/auth/callback}
-    google:
-        client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
-        client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
-    github:
-        client-id: ${GITHUB_CLIENT_ID:your-github-client-id}
-        client-secret: ${GITHUB_CLIENT_SECRET:your-github-client-secret}
-    facebook:
-        client-id: ${FACEBOOK_CLIENT_ID:your-facebook-client-id}
-        client-secret: ${FACEBOOK_CLIENT_SECRET:your-facebook-client-secret}
-    microsoft:
-        client-id: ${MICROSOFT_CLIENT_ID:your-microsoft-client-id}
-        client-secret: ${MICROSOFT_CLIENT_SECRET:your-microsoft-client-secret}
-
-# JWT Configuration
-# IMPORTANT: Set JWT_SECRET environment variable in production to a strong random 32+ character string
-# Example: export JWT_SECRET="your-super-secret-key-at-least-32-characters-long-for-safety"
 jwt:
     secret: ${JWT_SECRET:your-jwt-secret}
     issuer: theurl.io
@@ -66,5 +55,6 @@ logging:
         path: logs
     level:
         io.theurl.identity: debug
-        org.springframework: debug
+        org.springframework.cloud.config.client: debug
+        org.springframework: error
         root: info

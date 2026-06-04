@@ -45,7 +45,8 @@ public class BundleCountQueryHandler implements Handler<BundleCountQuery, Intege
                         predicates.add(orGroup);
                     }
                 }
-                default -> predicates.add(builder.equal(select.get(key), value));
+                default -> {
+                }
             }
         });
 
