@@ -2,9 +2,9 @@ package io.theurl.framework.configure;
 
 import com.neroyun.mediator.internal.AggregateException;
 import com.neroyun.mediator.validation.ValidationException;
-import io.theurl.framework.security.AccountException;
-import io.theurl.framework.security.CredentialException;
-import io.theurl.framework.security.UnauthorizedAccessException;
+import com.euonia.security.AccountException;
+import com.euonia.security.CredentialException;
+import com.euonia.security.UnauthorizedAccessException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
